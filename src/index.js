@@ -5,7 +5,7 @@ import App from "./App";
 import { Provider } from "react-redux";
 import store from "apis/store";
 import { LanguageProvider } from "./language";
-
+localStorage.setItem("language", "en");
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <LanguageProvider>
