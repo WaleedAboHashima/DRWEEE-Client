@@ -195,7 +195,7 @@ const Sidebar = ({
   ];
 
   return (
-    <motion.Box
+    <Box
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: isSidebarOpen ? 1 : 0, y: isSidebarOpen ? 0 : -20 }}
       transition={{ duration: 0.3 }}
@@ -245,7 +245,7 @@ const Sidebar = ({
           </Box>
         </Drawer>
       )}
-    </motion.Box>
+    </Box>
   );
 };
 

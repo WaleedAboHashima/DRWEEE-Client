@@ -19,6 +19,7 @@ import Reports from "scenes/system/reports/reports";
 import Orders from "scenes/system/orders/orders";
 import Products from "scenes/data/Products";
 import AddProduct from "scenes/data/Products/AddProduct";
+import AddCC from "scenes/system/countries/AddCC";
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
@@ -49,6 +50,7 @@ function App() {
                   <Route path="/info" element={<Info />} />
                   <Route path="/addproduct" element={<AddProduct />} />
                   <Route path="/products" element={<Products />} />
+                  <Route path="/addcc" element={<AddCC />} />
                 </Route>
               </Routes>
             ) : (

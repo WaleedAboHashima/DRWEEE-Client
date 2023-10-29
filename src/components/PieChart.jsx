@@ -9,20 +9,20 @@ const PieChart = ({ isDashboard = false }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [data, setData] = useState([]);
-  useEffect(() => {
-    dispatch(GetServicesHandler()).then((res) => {
-      if (res.payload.status === 200) {
-        const services = res.payload.data.services;
-        const chartData = services.map((service) => ({
-          id: service.name,
-          label: service.name,
-          value: service.price,
-          color: theme.palette.primary[500],
-        }));
-        setData(chartData);
-      }
-    });
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(GetServicesHandler()).then((res) => {
+  //     if (res.payload.status === 200) {
+  //       const services = res.payload.data.services;
+  //       const chartData = services.map((service) => ({
+  //         id: service.name,
+  //         label: service.name,
+  //         value: service.price,
+  //         color: theme.palette.primary[500],
+  //       }));
+  //       setData(chartData);
+  //     }
+  //   });
+  // }, [dispatch]);
   return (
     <ResponsivePie
     

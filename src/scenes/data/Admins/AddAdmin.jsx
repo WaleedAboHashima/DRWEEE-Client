@@ -19,7 +19,7 @@ import React, { useContext, useEffect, useState } from "react";
 import Cookies from "universal-cookie";
 import AdminIcon from "assets/addAdmin.svg";
 import { useDispatch } from "react-redux";
-import { GetCountriesHandler } from "apis/citiesandcountries";
+import { GetCountriesHandler } from "apis/system/citiesandcountries";
 const AddAdmin = () => {
   const context = useContext(LanguageContext);
   const cookies = new Cookies();

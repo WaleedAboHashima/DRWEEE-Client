@@ -22,6 +22,8 @@ import EditBillsReducer from "./Bills/EditBill"
 import PayBillsReducer from "./Bills/PayBills";
 //Reports
 import GetReportsReducer from "./Reports/GetReports";
+//Products
+import AddProductsReducer from "./data/Products/AddProducts";
 export default configureStore({
   reducer: {
     global: globalReducer,
@@ -47,5 +49,7 @@ export default configureStore({
     PayBills: PayBillsReducer,
     //Reports
     GetReports: GetReportsReducer,
+    //Products
+    AddProducts: AddProductsReducer,
   },
 });

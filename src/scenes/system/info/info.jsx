@@ -15,7 +15,7 @@ import { LanguageContext } from "language";
 import React, { useContext, useEffect, useState } from "react";
 import InfoIcon from "assets/editInfo.svg";
 import { useDispatch } from "react-redux";
-import { GetCountriesHandler } from "apis/citiesandcountries";
+import { GetCountriesHandler } from "apis/system/citiesandcountries";
 const Info = () => {
   const context = useContext(LanguageContext);
   const [role, setRole] = useState("");
@@ -52,7 +52,6 @@ const Info = () => {
     dispatch(GetCountriesHandler()).then((res) => {
       if (res.payload.status === 200) {
         if (res.payload.data.success) {
-          console.log(res.payload.data);
           const countries = res.payload.data.data.countries;
           setCountires(countries);
         }

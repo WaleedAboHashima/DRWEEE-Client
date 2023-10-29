@@ -1,11 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   Dialog,
   DialogActions,
   DialogContent,
@@ -15,25 +11,17 @@ import {
   MenuItem,
   Select,
   TextField,
-  Typography,
   useTheme,
 } from "@mui/material";
 import Header from "components/Header";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useDispatch, useSelector } from "react-redux";
 import { LanguageContext } from "language";
-import {
-  Delete,
-  Edit,
-  AddOutlined,
-  SellOutlined,
-  CloseOutlined,
-  MoreVertOutlined,
-} from "@mui/icons-material";
+import { Delete, Edit, AddOutlined } from "@mui/icons-material";
 import Cookies from "universal-cookie";
 import { useNavigate } from "react-router-dom";
-import { GetUsersHandler } from "apis/data/Users/GetUsers";
 import { GetProductsHandler } from "apis/data/Products/GetProducts";
+import { DeleteProductHandler } from 'apis/data/Products/DeleteProduct';
 
 const Products = () => {
   const theme = useTheme();
@@ -41,7 +29,6 @@ const Products = () => {
   const [rows, setRows] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const context = useContext(LanguageContext);
-  const [isOpen, setisOpen] = useState(false);
   const [userdetails, setUserdetails] = useState({});
   const cookies = new Cookies();
   const [type, setType] = useState(0);
@@ -52,8 +39,8 @@ const Products = () => {
   const [salary, setSalary] = useState();
   const [percentage, setPercentage] = useState();
   const [way, setWay] = useState("fixed");
+  const [productDetails, setProductData] = useState("");
   const state = useSelector((state) => state.GetUsers);
-
   const columns = [
     {
       field: "id",
@@ -62,7 +49,15 @@ const Products = () => {
     {
       field: "Image",
       headerName: context.language === "en" ? "Image" : "البريد الألكتروني",
-      renderCell: ({row}) => <img width={'auto'} height={'100px'} src={row.Image} />,
+      renderCell: ({ row }) => (
+        <img
+          src={row.Image}
+          style={{ padding: "5px 0", borderRadius: "10px" }}
+          alt={"Product Image"}
+          width="60%"
+          height="150%"
+        />
+      ),
       width: 175,
     },
     {
@@ -88,23 +83,21 @@ const Products = () => {
     {
       field: "actions",
       headerName: context.language === "en" ? "Actions" : "الاجرائات",
-      renderCell: ({
-        row: { _id, name, type, orders, salary, percentage, way },
-      }) => {
+      renderCell: ({ row: { _id, Name } }) => {
         return (
           <Box>
             <IconButton
               onClick={() => {
                 setWay(way);
-                setUserdetails({ _id, name, salary, percentage });
-                setEditOpen(true);
+                setProductData({ _id, Name });
+                // setEditOpen(true);
               }}
             >
               <Edit sx={{ color: "green" }} />
             </IconButton>
             <IconButton
               onClick={() => {
-                setUserdetails({ _id, name });
+                setProductData({ _id, Name });
                 setFormOpen(true);
               }}
             >
@@ -115,6 +108,14 @@ const Products = () => {
       },
     },
   ];
+
+  const handleDelete = () => {
+    dispatch(DeleteProductHandler({id: productDetails._id})).then(res => {
+      if (res.payload.status === 200) {
+        window.location.reload();
+      } 
+    })
+  };
 
   useEffect(() => {
     dispatch(GetProductsHandler()).then((res) => {
@@ -144,24 +145,23 @@ const Products = () => {
             sx={{
               display:
                 cookies.get("_auth_role") === "Owner" ? "inlineblock" : "none",
-              backgroundColor: '#2F8608',
-              ":hover" : {
-                backgroundColor: '#2F860890'
+              backgroundColor: "#2F8608",
+              ":hover": {
+                backgroundColor: "#2F860890",
               },
               color: theme.palette.secondary[200],
               fontSize: "14px",
               fontWeight: "bold",
               p: "10px 20px",
             }}
-            // onClick={() => navigator("/addproduct")}
+            onClick={() => navigator("/addproduct")}
           >
             {context.language === "en" ? "ADD PRODUCTS" : "اضافه مسئول"}
             <AddOutlined sx={{ mr: "10px" }} />
           </Button>
         </Box>
       </Box>
-      <Box mt="40px" height="75vh"
-      >
+      <Box mt="40px" height="75vh">
         <DataGrid
           autoPageSize
           disableSelectionOnClick
@@ -186,18 +186,19 @@ const Products = () => {
         <DialogTitle id="alert-dialog-title">
           {context.language === "en" ? (
             <Box>
-              Delete <span style={{ color: "red" }}>{userdetails.name}?</span>
+              Delete{" "}
+              <span style={{ color: "red" }}>{productDetails.Name}?</span>
             </Box>
           ) : (
             <Box>
-              حذف <span style={{ color: "red" }}>{userdetails.name}؟</span>
+              حذف <span style={{ color: "red" }}>{productDetails.Name}؟</span>
             </Box>
           )}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             {context.language === "en"
-              ? "Are you sure you want to delete this employee?"
+              ? "Are you sure you want to delete this product?"
               : "هل انت متأكد بأنك تريد ازاله هذا الموظف؟"}
           </DialogContentText>
         </DialogContent>
@@ -206,115 +207,10 @@ const Products = () => {
             {" "}
             {context.language === "en" ? "Cancel" : "الغاء"}
           </Button>
-          <Button autoFocus color="error">
+          <Button onClick={() => handleDelete()} autoFocus color="error">
             {context.language === "en" ? "Delete" : "حذف"}
           </Button>
         </DialogActions>
-      </Dialog>
-      <Dialog
-        fullScreen
-        open={isOpen}
-        onClose={() => setisOpen(!isOpen)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle
-          id="alert-dialog-title"
-          display={"flex"}
-          justifyContent={"space-between"}
-        >
-          <span style={{ color: "white" }}>
-            Orders for the user : {userdetails.name}
-          </span>
-          <IconButton
-            onClick={() => {
-              setisOpen(false);
-              setOrders([]);
-            }}
-          >
-            <CloseOutlined />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Box display={"flex"} flexWrap={"wrap"} gap={20}>
-            {orders ? (
-              orders.map((order) => (
-                <Card sx={{ width: 345, maxWidth: 345 }}>
-                  <CardHeader
-                    avatar={
-                      <Avatar sx={{ bgcolor: "white" }} aria-label="recipe">
-                        R
-                      </Avatar>
-                    }
-                    action={
-                      <IconButton aria-label="settings">
-                        <MoreVertOutlined />
-                      </IconButton>
-                    }
-                    title={order.service.name}
-                    subheader={order.amount_paid}
-                  />
-                  <Box
-                    display={"flex"}
-                    flexWrap={"wrap"}
-                    justifyContent={"space-between"}
-                    flexDirection={"column"}
-                    gap={3}
-                    p={3}
-                  >
-                    <Typography>
-                      Client Name : {`${order.client.full_name}`}
-                    </Typography>
-                    <Typography>Client Code : {order.client.code}</Typography>
-                    <Typography>Doctors : {order.doctor.name}</Typography>
-                    <Typography>
-                      Assistances :{" "}
-                      {order.assistances.map((assistance) => assistance.name)}
-                    </Typography>
-                    <Typography>
-                      Addtional Info :
-                      <br />
-                      {order.addtionalInfo.map((info) => {
-                        const keyValuePairs = Object.entries(info);
-                        const result = keyValuePairs.map(
-                          ([key, value], index) => (
-                            <Box key={index} display={"flex"}>
-                              <Typography>
-                                {key} : {value}
-                              </Typography>
-                            </Box>
-                          )
-                        );
-                        return result;
-                      })}
-                    </Typography>
-                  </Box>
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary">
-                      Time : {order.time}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Date : {order.date}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Finished : {order.done ? "Yes" : "No"}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <Box
-                display={"flex"}
-                justifyContent={"center"}
-                alignItems={"center"}
-                width={"100%"}
-                height={"100%"}
-              >
-                No Orders Found
-              </Box>
-            )}
-          </Box>
-        </DialogContent>
       </Dialog>
       <Dialog
         dir={context.language === "en" ? "ltr" : "rtl"}

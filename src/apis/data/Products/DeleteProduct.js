@@ -13,13 +13,13 @@ const initialState = {
   error: "",
 };
 
-const api = `${baseURL}/api/main/reports`;
+const api = `${baseURL}/api/main/product/`;
 
-export const GetReportsHandler = createAsyncThunk(
-  "ReportsData/GetReportsHandler",
-  async () => {
+export const DeleteProductHandler = createAsyncThunk(
+  "ProductsData/DeleteProductHandler",
+  async (arg) => {
     try {
-      const response = await axios.get(api, {
+      const response = await axios.delete(api + arg.id, {
         headers: { Authorization: `Bearer ${cookies.get("_auth_token")}` },
       });
       return {
@@ -35,12 +35,12 @@ export const GetReportsHandler = createAsyncThunk(
   }
 );
 
-const ReportsSlice = createSlice({
-  name: "ReportsData",
+const ProductsSlice = createSlice({
+  name: "ProductsData",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(GetReportsHandler.fulfilled, (state, action) => {
+    builder.addCase(DeleteProductHandler.fulfilled, (state, action) => {
       state.loading = true;
       if (action.payload.status === 200) {
         state.data = action.payload.data;
@@ -56,14 +56,14 @@ const ReportsSlice = createSlice({
         state.error = action.payload.message;
       }
     });
-    builder.addCase(GetReportsHandler.pending, (state) => {
+    builder.addCase(DeleteProductHandler.pending, (state) => {
       state.loading = true;
       state.data = [];
       state.error = "";
       state.status = null;
       state.state = "Pending";
     });
-    builder.addCase(GetReportsHandler.rejected, (state) => {
+    builder.addCase(DeleteProductHandler.rejected, (state) => {
       state.loading = false;
       state.data = [];
       state.error = "Server Error";
@@ -73,4 +73,4 @@ const ReportsSlice = createSlice({
   },
 });
 
-export default ReportsSlice.reducer;
+export default ProductsSlice.reducer;
