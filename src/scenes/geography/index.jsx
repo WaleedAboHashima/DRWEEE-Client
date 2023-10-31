@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Box, CircularProgress, useTheme } from "@mui/material";
+import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
 import Header from "components/Header";
 import { LanguageContext } from "language";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
@@ -17,7 +17,6 @@ const CustomMarker = ({ position, label, info, country }) => {
   const handleMouseOut = () => {
     setIsHovered(false);
   };
-
   return (
     <>
       <Marker
@@ -25,24 +24,26 @@ const CustomMarker = ({ position, label, info, country }) => {
         onMouseOver={handleMouseOver}
         onMouseOut={handleMouseOut}
       />
-      {isHovered && (
-        <Box
-          sx={{
-            position: "absolute",
-            zIndex: 1,
-            background: "white",
-            padding: "8px",
-            borderRadius: "4px",
-            color: "black",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-            top: 30,
-          }}
-        >
-          {context.language === "en"
-            ? `Total Customers in ${country} : ${info[country]}`
-            : `عدد العملاء في ${country} هو : ${info[country]}`}
-        </Box>
-      )}
+      {isHovered &&
+        info.map((info) => (
+          <Box
+            sx={{
+              position: "absolute",
+              zIndex: 1,
+              background: "white",
+              padding: "8px",
+              borderRadius: "4px",
+              color: "black",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+              top: 30,
+              left: 30
+            }}
+          >
+            <Typography> Name : {info.Name}</Typography>
+            <Typography>Phone: {info.Phone}</Typography>
+            <Typography>Address: {info.Address}</Typography>
+          </Box>
+        ))}
     </>
   );
 };
@@ -87,6 +88,8 @@ const Geography = () => {
           (order) => order.User.Location
         );
         setLocations(location);
+        const user = res.payload.data.orders.map((order) => order.User);
+        setInfo(user);
       }
     });
   }, [dispatch]);
