@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 
-// export const baseURL = "https://drweee.onrender.com";
-export const baseURL = "http://localhost:8000";
+export const baseURL = "https://drweee.onrender.com";
+// export const baseURL = "http://localhost:8000";
 export default [
   { name: "Afghanistan", arabicName: "أفغانستان", shortcut: "AF" },
   { name: "Albania", arabicName: "ألبانيا", shortcut: "AL" },
