@@ -13,15 +13,20 @@ const initialState = {
   error: "",
 };
 
-const api = `${baseURL}/api/user/`;
+const api = `${baseURL}/api/main/edit/user/`;
 
 export const EditUsersHandler = createAsyncThunk(
   "UserData/EditUsersHandler",
   async (arg) => {
     try {
-      const response = await axios.patch(
+      const response = await axios.put(
         api + arg._id,
-        { email: arg.email },
+        {
+          email: arg.email,
+          phone: arg.phone,
+          fullName: arg.name,
+          permission: arg.permission,
+        },
         {
           headers: { Authorization: `Bearer ${cookies.get("_auth_token")}` },
         }

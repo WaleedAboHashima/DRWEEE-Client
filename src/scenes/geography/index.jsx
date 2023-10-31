@@ -5,6 +5,7 @@ import { LanguageContext } from "language";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { useDispatch } from "react-redux";
 import axios from "axios";
+import { GetOrdersHandler } from "apis/data/Orders/GetOrders";
 
 const CustomMarker = ({ position, label, info, country }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -53,12 +54,7 @@ const Geography = () => {
   const [currentLocation, setCurrentLocation] = useState();
   const [loading, setLoading] = useState(true);
   const [info, setInfo] = useState({});
-  const [selectedLocation, setSelectedLocation] = useState([
-    {
-      latitude: "",
-      longitude: "",
-    },
-  ]);
+  const [locations, setLocations] = useState([{ lat: "", lng: "" }]);
 
   const mapOptions = {
     disableDefaultUI: true, // Hide default controls
@@ -84,28 +80,16 @@ const Geography = () => {
     }
   }, []);
 
-  const geocodeCountry = async (countryCode) => {
-    try {
-      const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?components=country:${countryCode}&key=AIzaSyCewVD8Afv0cy6NGoCZkQ4PZRW3OQCFfHA`
-      );
-      const data = response.data;
-
-      if (data.status === "OK" && data.results.length > 0) {
-        const { lat, lng } = data.results[0].geometry.location;
-
-        setSelectedLocation((prevLocation) => [
-          ...prevLocation,
-          { latitude: lat, longitude: lng, code: countryCode },
-        ]);
+  useEffect(() => {
+    dispatch(GetOrdersHandler()).then((res) => {
+      if (res.payload.data) {
+        const location = res.payload.data.orders.map(
+          (order) => order.User.Location
+        );
+        setLocations(location);
       }
-      return null;
-    } catch (error) {
-      console.error("Error geocoding country:", error);
-      return null;
-    }
-  };
-
+    });
+  }, [dispatch]);
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -140,17 +124,19 @@ const Geography = () => {
               zoom={5}
               center={currentLocation}
             >
-              {selectedLocation.map((location, index) => (
-                <CustomMarker
-                  key={index}
-                  position={{
-                    lat: location.latitude,
-                    lng: location.longitude,
-                  }}
-                  info={info}
-                  country={location.code}
-                />
-              ))}
+              {locations.length > 0 &&
+                locations.map((location, index) => {
+                  return (
+                    <CustomMarker
+                      key={index}
+                      position={{
+                        lat: parseFloat(location.lat),
+                        lng: parseFloat(location.lng),
+                      }}
+                      info={info}
+                    />
+                  );
+                })}
             </GoogleMap>
           )}
         </LoadScript>

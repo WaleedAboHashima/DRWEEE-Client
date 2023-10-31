@@ -1,13 +1,8 @@
-import { useTheme } from "@emotion/react";
-import { AddOutlined, CloudUploadOutlined } from "@mui/icons-material";
+import {  CloudUploadOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Checkbox,
   CircularProgress,
-  FormControlLabel,
-  MenuItem,
-  Select,
   TextField,
   Typography,
 } from "@mui/material";
@@ -21,10 +16,10 @@ import { AddProductsHandler } from "apis/data/Products/AddProducts";
 const AddProduct = () => {
   const context = useContext(LanguageContext);
   const [image, setImage] = useState();
+  const [points, setPoints] = useState("");
   const [errorMessage, setError] = useState("");
   const [name, setName] = useState("");
   const state = useSelector(state => state.AddProducts)
-  const [points, setPoints] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const dispatch = useDispatch();

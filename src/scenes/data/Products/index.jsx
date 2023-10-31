@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,6 +12,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  Typography,
   useTheme,
 } from "@mui/material";
 import Header from "components/Header";
@@ -21,7 +23,10 @@ import { Delete, Edit, AddOutlined } from "@mui/icons-material";
 import Cookies from "universal-cookie";
 import { useNavigate } from "react-router-dom";
 import { GetProductsHandler } from "apis/data/Products/GetProducts";
-import { DeleteProductHandler } from 'apis/data/Products/DeleteProduct';
+import { DeleteProductHandler } from "apis/data/Products/DeleteProduct";
+import { AddProductsHandler } from "apis/data/Products/AddProducts";
+import { CloudUploadOutlined } from "@mui/icons-material";
+import { EditProductHandler } from "apis/data/Products/EditProduct";
 
 const Products = () => {
   const theme = useTheme();
@@ -31,6 +36,11 @@ const Products = () => {
   const context = useContext(LanguageContext);
   const [userdetails, setUserdetails] = useState({});
   const cookies = new Cookies();
+  const [image, setImage] = useState();
+  const [points, setPoints] = useState("");
+  const [errorMessage, setError] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
   const [type, setType] = useState(0);
   const navigator = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -90,7 +100,7 @@ const Products = () => {
               onClick={() => {
                 setWay(way);
                 setProductData({ _id, Name });
-                // setEditOpen(true);
+                setEditOpen(true);
               }}
             >
               <Edit sx={{ color: "green" }} />
@@ -109,12 +119,38 @@ const Products = () => {
     },
   ];
 
+  const handleFileChange = (event) => {
+    setImage(event.target.files[0]);
+  };
+
+  const handleSubmit = (id) => {
+    setError("");
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("price", price);
+    formData.append("points", points);
+    formData.append("description", description);
+    formData.append("image", image);
+    dispatch(EditProductHandler({id: productDetails._id, formdata: formData})).then((res) => {
+      if (res.payload.data) {
+        if (res.payload.data.success) {
+          setEditOpen(!editOpen);
+          window.location.reload();
+        } else {
+          setError(res.payload.data.message);
+        }
+      } else {
+        setError("Error in the submited fields");
+      }
+    });
+  };
+
   const handleDelete = () => {
-    dispatch(DeleteProductHandler({id: productDetails._id})).then(res => {
-      if (res.payload.status === 200) {
+    dispatch(DeleteProductHandler({ id: productDetails._id })).then((res) => {
+      if (res.payload.data.success) {
         window.location.reload();
-      } 
-    })
+      }
+    });
   };
 
   useEffect(() => {
@@ -224,84 +260,161 @@ const Products = () => {
             <Box>
               Edit{" "}
               <span style={{ color: theme.palette.primary[400] }}>
-                {userdetails.name}?
+                {productDetails.Name}?
               </span>
             </Box>
           ) : (
             <Box>
               تعديل{" "}
               <span style={{ color: theme.palette.primary[400] }}>
-                {userdetails.name}؟
+                {productDetails.Name}؟
               </span>
             </Box>
           )}
         </DialogTitle>
         <DialogContent>
           <Box
+            width={"100%"}
             display={"flex"}
-            alignItems={"center"}
-            gap={2}
             flexDirection={"column"}
+            p={5}
+            gap={2}
           >
-            <TextField
-              fullWidth
-              dir={context.language === "en" ? "ltr" : "rtl"}
-              placeholder={
-                context.language === "en"
-                  ? `Name: ${userdetails.name}`
-                  : `الاسم: ${userdetails.name}`
-              }
-              onChange={(e) => setName(e.target.value)}
-            />
-            {way === "fixed" ? (
-              <TextField
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                fullWidth
-                placeholder={
-                  context.language === "en"
-                    ? `Salary: ${userdetails.salary}`
-                    : `المرتب: ${userdetails.salary}`
-                }
-                onChange={(e) => setSalary(e.target.value)}
-              />
+            {image ? (
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: { xs: "column", lg: "row" },
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <Box
+                  justifyContent={"center"}
+                  gap={2}
+                  alignItems={"center"}
+                  display={"flex"}
+                  width={"100%"}
+                  flexDirection={"column"}
+                >
+                  <img
+                    src={URL.createObjectURL(image)}
+                    alt={`uploaded image`}
+                    style={{
+                      maxWidth: "50%",
+                      borderRadius: "20px",
+                    }}
+                  />
+                  <Button
+                    onClick={() => {
+                      setImage("");
+                    }}
+                    variant="contained"
+                    color="error"
+                    className="remove-button"
+                  >
+                    Remove
+                  </Button>
+                </Box>
+              </Box>
             ) : (
-              <TextField
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                fullWidth
-                placeholder={
-                  context.language === "en"
-                    ? `Percentage %: ${userdetails.percentage}`
-                    : `النسبه : ${userdetails.percentage} %`
-                }
-                onChange={(e) => setPercentage(e.target.value)}
-              />
+              <Box
+                display={"flex"}
+                flexDirection={"column"}
+                justifyContent={"center"}
+                alignItems={"center"}
+                gap={2}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "100%",
+                    backgroundColor: "transparent",
+                    padding: 5,
+                    mx: "auto",
+                    width: "300px",
+                    height: "200px",
+                    //   border: `2px dashed ${colors.primary[500]}`,
+                    borderRadius: 1,
+                    "&:hover": {
+                      cursor: "pointer",
+                      backgroundColor: "#e0e0e010",
+                    },
+                  }}
+                >
+                  <input
+                    style={{ display: "none" }}
+                    accept="image/*"
+                    sx={{ display: "none" }}
+                    id="upload-image"
+                    type="file"
+                    onChange={handleFileChange}
+                    multiple
+                  />
+                  <label htmlFor="upload-image">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <CloudUploadOutlined
+                        sx={{ fontSize: 48, marginBottom: 1 }}
+                      />
+                      <Typography variant="h6">
+                        {context.language === "en"
+                          ? "Upload Product Image"
+                          : "رفع صوره المتجر"}
+                      </Typography>
+                      <Typography variant="subtitle1" color="textSecondary">
+                        {context.language === "en"
+                          ? " Click to select an image file here"
+                          : " انقر او اسحب الصوره هنا لرفعها"}
+                      </Typography>
+                    </Box>
+                  </label>
+                </Box>
+              </Box>
             )}
-            <Select
-              sx={
-                context.language === "ar" && {
-                  "& .MuiSvgIcon-root": {
-                    left: "7px",
-                    right: "auto",
-                  },
-                }
-              }
-              fullWidth
-              value={way}
-              onChange={(e) => setWay(e.target.value)}
-            >
-              <MenuItem
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                value={"fixed"}
-              >
-                {context.language === "en" ? "Fixed" : "ثابت"}
-              </MenuItem>
-              <MenuItem
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                value={"com"}
-              >
-                {context.language === "en" ? "Commission" : "عموله"}
-              </MenuItem>
-            </Select>
+            <TextField
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Name"
+            />
+            <TextField
+              value={points}
+              onChange={(e) => setPoints(e.target.value)}
+              placeholder="Points"
+            />
+            <TextField
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Price"
+            />
+            <TextField
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              variant="outlined"
+              multiline
+              rows={6}
+              placeholder="Description..."
+            />
+            <Typography variant="h2" sx={{ textAlign: "center" }}>
+              {errorMessage}
+            </Typography>
+            <Box
+              width={"100%"}
+              display={"flex"}
+              gap={2}
+              justifyContent={"right"}
+            ></Box>
           </Box>
         </DialogContent>
         <DialogActions>
@@ -309,7 +422,7 @@ const Products = () => {
             {" "}
             {context.language === "en" ? "Cancel" : "الغاء"}
           </Button>
-          <Button autoFocus color="success">
+          <Button onClick={() => handleSubmit()} autoFocus color="success">
             {context.language === "en" ? "Edit" : "تعديل"}
           </Button>
         </DialogActions>

@@ -12,7 +12,7 @@ const initialState = {
 };
 
 const cookies = new Cookies();
-const api = `${baseURL}/api/user`;
+const api = `${baseURL}/api/main/add/user`;
 
 export const AddUsersHandler = createAsyncThunk(
   "UserData/AddUsersHandler",
@@ -21,9 +21,16 @@ export const AddUsersHandler = createAsyncThunk(
       const response = await axios.post(
         api,
         {
-          username: arg.username,
+          fullName: arg.name,
           email: arg.email,
-          pwd: arg.password,
+          phone: arg.phone,
+          password: arg.password,
+          permission: arg.permission,
+          role: arg.role,
+          adminId: arg.selectedAdmin,
+          city: arg.selectedCity,
+          country: arg.selectedCoutnry,
+          government: arg.selectedGov,
         },
         { headers: { Authorization: `Bearer ${cookies.get("_auth_token")}` } }
       );

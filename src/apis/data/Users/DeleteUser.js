@@ -12,7 +12,7 @@ const initialState = {
   error: "",
 };
 
-const api = `${baseURL}/api/user/`;
+const api = `${baseURL}/api/owner/user/`;
 
 export const DeleteUserHandler = createAsyncThunk(
   "UserData/DeleteUserHandler",

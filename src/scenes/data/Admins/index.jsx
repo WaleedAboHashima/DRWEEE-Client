@@ -6,11 +6,13 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControlLabel,
   IconButton,
   MenuItem,
   Select,
@@ -33,6 +35,8 @@ import {
 import Cookies from "universal-cookie";
 import { useNavigate } from "react-router-dom";
 import { GetUsersHandler } from "apis/data/Users/GetUsers";
+import { DeleteUserHandler } from "apis/data/Users/DeleteUser";
+import { EditUsersHandler } from "apis/data/Users/EditUser";
 
 const Users = () => {
   const theme = useTheme();
@@ -40,19 +44,17 @@ const Users = () => {
   const [rows, setRows] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const context = useContext(LanguageContext);
-  const [isOpen, setisOpen] = useState(false);
   const [userdetails, setUserdetails] = useState({});
   const cookies = new Cookies();
-  const [type, setType] = useState(0);
   const navigator = useNavigate();
-  const [orders, setOrders] = useState([]);
   const [editOpen, setEditOpen] = useState(false);
   const [name, setName] = useState();
-  const [salary, setSalary] = useState();
-  const [percentage, setPercentage] = useState();
   const [way, setWay] = useState("fixed");
   const state = useSelector((state) => state.GetUsers);
-
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [permission, setPermission] = useState("");
+  const [error, setError] = useState("");
   const columns = [
     {
       field: "id",
@@ -82,15 +84,13 @@ const Users = () => {
     {
       field: "actions",
       headerName: context.language === "en" ? "Actions" : "الاجرائات",
-      renderCell: ({
-        row: { _id, name, type, orders, salary, percentage, way },
-      }) => {
+      renderCell: ({ row: { _id, fullName, role } }) => {
         return (
           <Box>
             <IconButton
               onClick={() => {
                 setWay(way);
-                setUserdetails({ _id, name, salary, percentage });
+                setUserdetails({ _id, fullName, role });
                 setEditOpen(true);
               }}
             >
@@ -98,7 +98,7 @@ const Users = () => {
             </IconButton>
             <IconButton
               onClick={() => {
-                setUserdetails({ _id, name });
+                setUserdetails({ _id, fullName });
                 setFormOpen(true);
               }}
             >
@@ -109,6 +109,23 @@ const Users = () => {
       },
     },
   ];
+
+  const handleEdit = () => {
+    dispatch(EditUsersHandler({_id: userdetails._id, name : name && name, phone: phone && phone, email: email && email, permission: permission && permission})).then(res => {
+      if (res.payload.status === 200) {
+        window.location.reload();
+      }
+    })
+  };
+
+
+  const handleDelete = () => {
+    dispatch(DeleteUserHandler({ _id: userdetails._id })).then((res) => {
+      if (res.payload.status === 200) {
+        window.location.reload();
+      }
+    });
+  };
 
   useEffect(() => {
     dispatch(GetUsersHandler()).then((res) => {
@@ -138,9 +155,9 @@ const Users = () => {
             sx={{
               display:
                 cookies.get("_auth_role") === "Owner" ? "inlineblock" : "none",
-              backgroundColor: '#2F8608',
-              ":hover" : {
-                backgroundColor: '#2F860890'
+              backgroundColor: "#2F8608",
+              ":hover": {
+                backgroundColor: "#2F860890",
               },
               color: theme.palette.secondary[200],
               fontSize: "14px",
@@ -154,8 +171,7 @@ const Users = () => {
           </Button>
         </Box>
       </Box>
-      <Box mt="40px" height="75vh"
-      >
+      <Box mt="40px" height="75vh">
         <DataGrid
           autoPageSize
           disableSelectionOnClick
@@ -180,18 +196,19 @@ const Users = () => {
         <DialogTitle id="alert-dialog-title">
           {context.language === "en" ? (
             <Box>
-              Delete <span style={{ color: "red" }}>{userdetails.name}?</span>
+              Delete{" "}
+              <span style={{ color: "red" }}>{userdetails.fullName}?</span>
             </Box>
           ) : (
             <Box>
-              حذف <span style={{ color: "red" }}>{userdetails.name}؟</span>
+              حذف <span style={{ color: "red" }}>{userdetails.fullName}؟</span>
             </Box>
           )}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             {context.language === "en"
-              ? "Are you sure you want to delete this employee?"
+              ? "Are you sure you want to delete this user?"
               : "هل انت متأكد بأنك تريد ازاله هذا الموظف؟"}
           </DialogContentText>
         </DialogContent>
@@ -200,115 +217,10 @@ const Users = () => {
             {" "}
             {context.language === "en" ? "Cancel" : "الغاء"}
           </Button>
-          <Button autoFocus color="error">
+          <Button autoFocus color="error" onClick={() => handleDelete()}>
             {context.language === "en" ? "Delete" : "حذف"}
           </Button>
         </DialogActions>
-      </Dialog>
-      <Dialog
-        fullScreen
-        open={isOpen}
-        onClose={() => setisOpen(!isOpen)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle
-          id="alert-dialog-title"
-          display={"flex"}
-          justifyContent={"space-between"}
-        >
-          <span style={{ color: "white" }}>
-            Orders for the user : {userdetails.name}
-          </span>
-          <IconButton
-            onClick={() => {
-              setisOpen(false);
-              setOrders([]);
-            }}
-          >
-            <CloseOutlined />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Box display={"flex"} flexWrap={"wrap"} gap={20}>
-            {orders ? (
-              orders.map((order) => (
-                <Card sx={{ width: 345, maxWidth: 345 }}>
-                  <CardHeader
-                    avatar={
-                      <Avatar sx={{ bgcolor: "white" }} aria-label="recipe">
-                        R
-                      </Avatar>
-                    }
-                    action={
-                      <IconButton aria-label="settings">
-                        <MoreVertOutlined />
-                      </IconButton>
-                    }
-                    title={order.service.name}
-                    subheader={order.amount_paid}
-                  />
-                  <Box
-                    display={"flex"}
-                    flexWrap={"wrap"}
-                    justifyContent={"space-between"}
-                    flexDirection={"column"}
-                    gap={3}
-                    p={3}
-                  >
-                    <Typography>
-                      Client Name : {`${order.client.full_name}`}
-                    </Typography>
-                    <Typography>Client Code : {order.client.code}</Typography>
-                    <Typography>Doctors : {order.doctor.name}</Typography>
-                    <Typography>
-                      Assistances :{" "}
-                      {order.assistances.map((assistance) => assistance.name)}
-                    </Typography>
-                    <Typography>
-                      Addtional Info :
-                      <br />
-                      {order.addtionalInfo.map((info) => {
-                        const keyValuePairs = Object.entries(info);
-                        const result = keyValuePairs.map(
-                          ([key, value], index) => (
-                            <Box key={index} display={"flex"}>
-                              <Typography>
-                                {key} : {value}
-                              </Typography>
-                            </Box>
-                          )
-                        );
-                        return result;
-                      })}
-                    </Typography>
-                  </Box>
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary">
-                      Time : {order.time}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Date : {order.date}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Finished : {order.done ? "Yes" : "No"}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <Box
-                display={"flex"}
-                justifyContent={"center"}
-                alignItems={"center"}
-                width={"100%"}
-                height={"100%"}
-              >
-                No Orders Found
-              </Box>
-            )}
-          </Box>
-        </DialogContent>
       </Dialog>
       <Dialog
         dir={context.language === "en" ? "ltr" : "rtl"}
@@ -322,84 +234,67 @@ const Users = () => {
             <Box>
               Edit{" "}
               <span style={{ color: theme.palette.primary[400] }}>
-                {userdetails.name}?
+                {userdetails.fullName}?
               </span>
             </Box>
           ) : (
             <Box>
               تعديل{" "}
               <span style={{ color: theme.palette.primary[400] }}>
-                {userdetails.name}؟
+                {userdetails.fullName}؟
               </span>
             </Box>
           )}
         </DialogTitle>
         <DialogContent>
           <Box
+            width={"100%"}
             display={"flex"}
-            alignItems={"center"}
-            gap={2}
             flexDirection={"column"}
+            p={2}
+            gap={2}
           >
             <TextField
-              fullWidth
-              dir={context.language === "en" ? "ltr" : "rtl"}
-              placeholder={
-                context.language === "en"
-                  ? `Name: ${userdetails.name}`
-                  : `الاسم: ${userdetails.name}`
-              }
+              value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder="Full Name"
             />
-            {way === "fixed" ? (
-              <TextField
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                fullWidth
-                placeholder={
-                  context.language === "en"
-                    ? `Salary: ${userdetails.salary}`
-                    : `المرتب: ${userdetails.salary}`
-                }
-                onChange={(e) => setSalary(e.target.value)}
-              />
-            ) : (
-              <TextField
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                fullWidth
-                placeholder={
-                  context.language === "en"
-                    ? `Percentage %: ${userdetails.percentage}`
-                    : `النسبه : ${userdetails.percentage} %`
-                }
-                onChange={(e) => setPercentage(e.target.value)}
-              />
-            )}
-            <Select
-              sx={
-                context.language === "ar" && {
-                  "& .MuiSvgIcon-root": {
-                    left: "7px",
-                    right: "auto",
-                  },
-                }
+            <TextField
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+            />
+            <TextField
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Phone"
+            />
+            {/* Roles */}
+            <Typography>Permission: </Typography>
+            <FormControlLabel
+              label={
+                userdetails.role === "Admin"
+                  ? "Add Admins"
+                  : userdetails.role === "SuperVisor"
+                  ? "Add Super Visors"
+                  : "Add City Admins"
               }
-              fullWidth
-              value={way}
-              onChange={(e) => setWay(e.target.value)}
-            >
-              <MenuItem
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                value={"fixed"}
-              >
-                {context.language === "en" ? "Fixed" : "ثابت"}
-              </MenuItem>
-              <MenuItem
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                value={"com"}
-              >
-                {context.language === "en" ? "Commission" : "عموله"}
-              </MenuItem>
-            </Select>
+              value={permission}
+              control={
+                <Checkbox
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setPermission(e.target.value);
+                    } else {
+                      setPermission("");
+                    }
+                  }}
+                />
+              }
+            />
+            <Typography variant="h3" textAlign={"center"}>
+              {error}
+            </Typography>
           </Box>
         </DialogContent>
         <DialogActions>
@@ -407,7 +302,7 @@ const Users = () => {
             {" "}
             {context.language === "en" ? "Cancel" : "الغاء"}
           </Button>
-          <Button autoFocus color="success">
+          <Button onClick={() => handleEdit()} autoFocus color="success">
             {context.language === "en" ? "Edit" : "تعديل"}
           </Button>
         </DialogActions>

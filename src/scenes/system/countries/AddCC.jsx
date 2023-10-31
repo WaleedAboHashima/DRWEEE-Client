@@ -39,10 +39,10 @@ const AddCC = () => {
 
   const handleAddGeo = () => {
     dispatch(
-      AddGeoInfo({ city: selectedCity, country: selectedCoutnry, government })
+      AddGeoInfo({ city: selectedCity.length > 1 && selectedCity, country: selectedCoutnry.length > 1 && selectedCoutnry, government })
     ).then((res) => {
       if (res.payload.data.success) {
-        window.location = "/countries";
+        // window.location = "/countries";
       } else {
         setError(res.payload.data.message);
       }

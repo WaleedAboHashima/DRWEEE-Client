@@ -1,33 +1,34 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { baseURL } from "constant/index";
 import axios from "axios";
-import {baseURL} from "constant/index";
 import Cookies from "universal-cookie";
 
-const cookies = new Cookies();
-
 const initialState = {
-  data: [],
-  state: "",
-  status: null,
+  date: {},
   loading: false,
   error: "",
+  status: null,
+  state: "",
 };
 
-const api = `${baseURL}/api/main/delete/product/`;
+const cookies = new Cookies();
+const api = `${baseURL}/api/main/edit/product/`;
 
-export const DeleteProductHandler = createAsyncThunk(
-  "ProductsData/DeleteProductHandler",
+export const EditProductHandler = createAsyncThunk(
+  "ProductsData/EditProductHandler",
   async (arg) => {
     try {
-      const response = await axios.delete(api + arg.id, {
+      const response = await axios.put(api + arg.id, arg.formdata, {
         headers: { Authorization: `Bearer ${cookies.get("_auth_token")}` },
       });
       return {
         data: response.data,
         status: response.status,
+        success: response.success
       };
     } catch (err) {
       return {
+        success: err.response.data.success,
         message: err.response.data.message,
         status: err.response.status,
       };
@@ -40,35 +41,35 @@ const ProductsSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(DeleteProductHandler.fulfilled, (state, action) => {
+    builder.addCase(EditProductHandler.fulfilled, (state, action) => {
       state.loading = true;
-      if (action.payload.status === 200) {
+      if (action.payload.status === 201) {
         state.data = action.payload.data;
-        state.status = action.payload.status;
+        state.loading = false;
         state.state = "Success";
-        state.error = "";
-        state.loading = false;
-      } else {
-        state.data = [];
         state.status = action.payload.status;
+        state.error = "";
+      } else {
         state.loading = false;
+        state.data = {};
         state.state = "Error";
+        state.status = action.payload.status;
         state.error = action.payload.message;
       }
     });
-    builder.addCase(DeleteProductHandler.pending, (state) => {
-      state.loading = true;
-      state.data = [];
-      state.error = "";
-      state.status = null;
-      state.state = "Pending";
-    });
-    builder.addCase(DeleteProductHandler.rejected, (state) => {
+    builder.addCase(EditProductHandler.rejected, (state) => {
       state.loading = false;
-      state.data = [];
-      state.error = "Server Error";
+      state.date = {};
       state.state = "Rejected";
       state.status = 500;
+      state.error = "Server Error";
+    });
+    builder.addCase(EditProductHandler.pending, (state) => {
+      state.loading = true;
+      state.data = {};
+      state.state = "Pending";
+      state.status = null;
+      state.error = "";
     });
   },
 });
