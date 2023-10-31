@@ -6,14 +6,14 @@ const StatBox = ({ title, value, increase, icon, description }) => {
   const theme = useTheme();
   return (
     <Box
-      gridColumn="span 2"
+      gridColumn="span 3"
       gridRow="span 1"
       display="flex"
       flexDirection="column"
       justifyContent="space-between"
       p="1.25rem 1rem"
       flex="1 1 100%"
-      backgroundColor={theme.palette.background.alt}
+      backgroundColor={'#333333'}
       borderRadius="0.55rem"
     >
       <FlexBetween>
@@ -30,14 +30,7 @@ const StatBox = ({ title, value, increase, icon, description }) => {
       >
         {value}
       </Typography>
-      <FlexBetween gap="1rem">
-        <Typography
-          variant="h5"
-          fontStyle="italic"
-          sx={{ color: theme.palette.secondary.light }}
-        >
-          {increase}
-        </Typography>
+      <FlexBetween>
         <Typography>{description}</Typography>
       </FlexBetween>
     </Box>

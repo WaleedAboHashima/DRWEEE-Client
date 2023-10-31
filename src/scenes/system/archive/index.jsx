@@ -13,9 +13,6 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
-  MenuItem,
-  Select,
-  TextField,
   Typography,
 } from "@mui/material";
 import Header from "components/Header";
@@ -26,8 +23,8 @@ import {
   CloseOutlined,
   MoreVertOutlined,
   ArchiveOutlined,
+  UnarchiveOutlined,
   MoreHorizOutlined,
-  DoneOutlineOutlined,
   CheckOutlined,
 } from "@mui/icons-material";
 import { LanguageContext } from "language";
@@ -35,15 +32,27 @@ import Cookies from "universal-cookie";
 import { useDispatch } from "react-redux";
 import { GetOrdersHandler } from "apis/data/Orders/GetOrders";
 import { ArchiveOrderHandler } from "apis/data/Orders/ArchiveOrder";
-import { ChangeOrderStatusHandler } from "apis/data/Orders/ChangeStatus";
-const Orders = () => {
+const Archive = () => {
   const context = useContext(LanguageContext);
   const [isOpen, setisOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
   const [rows, setRows] = useState([]);
-  const [orderDetails, setOrderDetails] = useState({});
-  const [status, setStatus] = useState(0);
+  const [userdetails, setUserdetails] = useState({});
+  const cookies = new Cookies();
   const [orders, setOrders] = useState([]);
+  const [editOpen, setEditOpen] = useState(false);
+  const [way, setWay] = useState("fixed");
   const dispatch = useDispatch();
+
+
+
+  const handleArchive = (id) => {
+    dispatch(ArchiveOrderHandler({ id })).then((res) => {
+      if (res.payload.status === 200) {
+        window.location.reload();
+      }
+    });
+  };
   const columns = [
     {
       field: "id",
@@ -126,49 +135,22 @@ const Orders = () => {
           <Box>
             <IconButton
               onClick={() => {
-                setOrderDetails({ _id });
-                setisOpen(true);
-              }}
-            >
-              <Edit sx={{ color: "green" }} />
-            </IconButton>
-            <IconButton
-              onClick={() => {
                 handleArchive(_id);
               }}
             >
-              <ArchiveOutlined color="error" />
+              <UnarchiveOutlined color="error" />
             </IconButton>
           </Box>
         );
       },
     },
   ];
-
-  const handleEdit = () => {
-    dispatch(ChangeOrderStatusHandler({ id: orderDetails._id, status })).then(
-      (res) => {
-        if (res.payload.status === 200) {
-          window.location.reload();
-        }
-      }
-    );
-  };
-
-  const handleArchive = (id) => {
-    dispatch(ArchiveOrderHandler({ id })).then((res) => {
-      if (res.payload.status === 200) {
-        window.location.reload();
-      }
-    });
-  };
-
   useEffect(() => {
     dispatch(GetOrdersHandler()).then((res) => {
       if (res.payload.status === 200) {
         if (res.payload.data.success) {
           const orders = res.payload.data.orders.filter(
-            (order) => order.Archived === false
+            (order) => order.Archived === true
           );
           setRows(orders);
         }
@@ -210,38 +192,6 @@ const Orders = () => {
           columns={columns}
         />
       </Box>
-      <Dialog
-        fullWidth
-        open={isOpen}
-        onClose={() => setisOpen(!isOpen)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogContent>
-          <Box>
-            <Select
-              onChange={(e) => setStatus(e.target.value)}
-              value={status}
-              fullWidth
-            >
-              <MenuItem value={0}>Select a status</MenuItem>
-              <MenuItem value={"Pending"}>Pending</MenuItem>
-              <MenuItem value={"Delivered"}>Delivered</MenuItem>
-              <MenuItem value={"On the way"}>On the way</MenuItem>
-              <MenuItem value={"Canceled"}>Canceled</MenuItem>
-            </Select>
-          </Box>
-          <DialogActions>
-            <Button
-              onClick={() => handleEdit()}
-              disabled={!status && true}
-              variant="contained"
-            >
-              SAVE
-            </Button>
-          </DialogActions>
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 };
@@ -272,4 +222,4 @@ const arabicLocaleText = {
       : `${count.toLocaleString()} صف محدد`,
 };
 
-export default Orders;
+export default Archive;

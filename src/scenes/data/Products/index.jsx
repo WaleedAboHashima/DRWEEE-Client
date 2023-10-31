@@ -131,7 +131,9 @@ const Products = () => {
     formData.append("points", points);
     formData.append("description", description);
     formData.append("image", image);
-    dispatch(EditProductHandler({id: productDetails._id, formdata: formData})).then((res) => {
+    dispatch(
+      EditProductHandler({ id: productDetails._id, formdata: formData })
+    ).then((res) => {
       if (res.payload.data) {
         if (res.payload.data.success) {
           setEditOpen(!editOpen);
@@ -197,7 +199,11 @@ const Products = () => {
           </Button>
         </Box>
       </Box>
-      <Box mt="40px" height="75vh">
+      <Box
+        mt="40px"
+        height="75vh"
+        sx={{ "& .MuiTablePagination-root ": { color: "black" } }}
+      >
         <DataGrid
           autoPageSize
           disableSelectionOnClick

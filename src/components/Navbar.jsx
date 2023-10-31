@@ -1,17 +1,10 @@
 import React, { useContext, useState } from "react";
 import {
-  LightModeOutlined,
-  DarkModeOutlined,
   Menu as MenuIcon,
-  Search,
-  SettingsOutlined,
   ArrowDropDownOutlined,
-  TranslateOutlined,
-  GTranslateOutlined,
 } from "@mui/icons-material";
 import FlexBetween from "components/FlexBetween";
 import { useDispatch } from "react-redux";
-import { setMode } from "state";
 import profileImage from "assets/logoImage.svg";
 import {
   AppBar,
@@ -19,7 +12,6 @@ import {
   Box,
   Typography,
   IconButton,
-  InputBase,
   Toolbar,
   Menu,
   MenuItem,
@@ -60,6 +52,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
         position: "static",
         background: "none",
         boxShadow: "none",
+        backgroundColor: theme.palette.background.alt,
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>

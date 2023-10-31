@@ -111,13 +111,20 @@ const Users = () => {
   ];
 
   const handleEdit = () => {
-    dispatch(EditUsersHandler({_id: userdetails._id, name : name && name, phone: phone && phone, email: email && email, permission: permission && permission})).then(res => {
+    dispatch(
+      EditUsersHandler({
+        _id: userdetails._id,
+        name: name && name,
+        phone: phone && phone,
+        email: email && email,
+        permission: permission && permission,
+      })
+    ).then((res) => {
       if (res.payload.status === 200) {
         window.location.reload();
       }
-    })
+    });
   };
-
 
   const handleDelete = () => {
     dispatch(DeleteUserHandler({ _id: userdetails._id })).then((res) => {
@@ -171,7 +178,11 @@ const Users = () => {
           </Button>
         </Box>
       </Box>
-      <Box mt="40px" height="75vh">
+      <Box
+        mt="40px"
+        height="75vh"
+        sx={{ "& .MuiTablePagination-root ": { color: "black" } }}
+      >
         <DataGrid
           autoPageSize
           disableSelectionOnClick

@@ -170,7 +170,7 @@ const AddAdmin = () => {
             flexDirection={"column"}
             p={2}
             gap={2}
-            sx={{ backgroundColor: "green", borderRadius: 5 }}
+            sx={{ backgroundColor: "#7BB18D", borderRadius: 5 }}
           >
             <Header title={"Please enter Admin information below: "} />
             <TextField

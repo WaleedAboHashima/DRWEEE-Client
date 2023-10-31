@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-import {baseURL} from "constant/index";
+import { baseURL } from "constant/index";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
@@ -13,15 +13,19 @@ const initialState = {
   error: "",
 };
 
-const api = `${baseURL}/api/accountant/dashboard`;
+const api = `${baseURL}/api/main/order/`;
 
-export const GetAllDataHandler = createAsyncThunk(
-  "DashboardData/GetAllDataHandler",
-  async () => {
+export const ChangeOrderStatusHandler = createAsyncThunk(
+  "OrdersData/ChangeOrderStatusHandler",
+  async (arg) => {
     try {
-      const response = await axios.get(api, {
-        headers: { Authorization: `Bearer ${cookies.get("_auth_token")}` },
-      });
+      const response = await axios.put(
+        api + arg.id,
+        { status: arg.status },
+        {
+          headers: { Authorization: `Bearer ${cookies.get("_auth_token")}` },
+        }
+      );
       return {
         data: response.data,
         status: response.status,
@@ -35,12 +39,12 @@ export const GetAllDataHandler = createAsyncThunk(
   }
 );
 
-const DashboardSlice = createSlice({
-  name: "DashboardData",
+const ProductsSlice = createSlice({
+  name: "OrdersData",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(GetAllDataHandler.fulfilled, (state, action) => {
+    builder.addCase(ChangeOrderStatusHandler.fulfilled, (state, action) => {
       state.loading = true;
       if (action.payload.status === 200) {
         state.data = action.payload.data;
@@ -56,14 +60,14 @@ const DashboardSlice = createSlice({
         state.error = action.payload.message;
       }
     });
-    builder.addCase(GetAllDataHandler.pending, (state) => {
+    builder.addCase(ChangeOrderStatusHandler.pending, (state) => {
       state.loading = true;
       state.data = [];
       state.error = "";
       state.status = null;
       state.state = "Pending";
     });
-    builder.addCase(GetAllDataHandler.rejected, (state) => {
+    builder.addCase(ChangeOrderStatusHandler.rejected, (state) => {
       state.loading = false;
       state.data = [];
       state.error = "Server Error";
@@ -73,4 +77,4 @@ const DashboardSlice = createSlice({
   },
 });
 
-export default DashboardSlice.reducer;
+export default ProductsSlice.reducer;

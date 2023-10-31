@@ -9,6 +9,7 @@ import {
   Traffic,
   MovingOutlined,
   LocalShippingOutlined,
+  WarningAmberOutlined,
 } from "@mui/icons-material";
 import {
   Box,
@@ -24,14 +25,21 @@ import { LanguageContext } from "language";
 import BarChart from "components/BarChart";
 import { useDispatch, useSelector } from "react-redux";
 import PieChart from "components/PieChart";
+import { GetUsersHandler } from "apis/data/Users/GetUsers";
+import { GetOrdersHandler } from "apis/data/Orders/GetOrders";
+import { GetReportsHandler } from "apis/system/Reports/GetReports";
+import { GetProductsHandler } from "apis/data/Products/GetProducts";
 
 const Dashboard = () => {
   const theme = useTheme();
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
   const context = useContext(LanguageContext);
-  const [data, setData] = useState();
-  const state = useSelector((state) => state.GetAllData);
+  const [users, setUsers] = useState(0);
+  const state = {}
+  const data = 0
   const [orders, setOrders] = useState([]);
+  const [reports, setReports] = useState(0);
+  const [products , setProducts] = useState(0);
   const columns = [
     {
       field: "id",
@@ -76,74 +84,68 @@ const Dashboard = () => {
       headerName: "ID",
     },
     {
-      field: "name",
-      headerName: context.language === "en" ? "Name" : "لاسم",
-      flex: 0.5,
-      cellClassName: "custom-cell-class",
-      valueGetter: (value) => value.row.client.full_name,
+      field: "OrderNo",
+      headerName: context.language === "en" ? "Order No." : "لاسم",
+      width: 200,
     },
     {
-      field: "date",
-      headerName: context.language === "en" ? "Date" : "التاريخ",
-      flex: 0.5,
-      valueGetter: ({ row }) => row.date.substring(0, 10),
-      cellClassName: "custom-cell-class",
+      field: "Name",
+      headerName: context.language === "en" ? "Customer Name" : "البريد الألكتروني",
+      responsive: "sm",
+      valueGetter: ({row}) => row.User.Name,
+      width: 200,
     },
     {
-      field: "time",
-      headerName: context.language === "en" ? "Time" : "الوقت",
-      flex: 0.5,
-      valueGetter: ({ row }) => row.date.substring(11, 19),
-      cellClassName: "custom-cell-class",
+      field: "Phone",
+      headerName: context.language === "en" ? "Customer Phone" : "البريد الألكتروني",
+      responsive: "sm",
+      valueGetter: ({row}) => row.User.Phone,
+      width: 200,
     },
     {
-      field: "service_name",
-      headerName: context.language === "en" ? "Service" : "الخدمه",
-      flex: 0.5,
-      cellClassName: "custom-cell-class",
-      valueGetter: (value) => value.row.service.name,
+      field: "Status",
+      headerName: context.language === "en" ? "Status" : "البريد الألكتروني",
+      responsive: "sm",
+      width: 200,
     },
     {
-      field: "amount_paid",
-      headerName: context.language === "en" ? "Amount Paid" : "المدفوع",
-      flex: 0.5,
-      valueGetter: (value) => value.row.amount_paid,
-      cellClassName: "custom-cell-class",
+      field: "TotalPoints",
+      headerName: context.language === "en" ? "TotalPoints" : "الدور",
+      width: 200,
     },
     {
-      field: "currency",
-      headerName: context.language === "en" ? "Currency" : "العمله",
-      cellClassName: "custom-cell-class",
-      flex: 0.5,
-    },
-    {
-      field: "done",
-      headerName: context.language === "en" ? "Finished" : "انتهي",
-      flex: 0.5,
-      cellClassName: "custom-cell-class",
-      valueGetter: (value) =>
-        value.row.done
-          ? context.language === "en"
-            ? "Finished"
-            : "انتهي"
-          : context.language === "en"
-          ? "Not Finished"
-          : "لم تنتهي",
+      field: "TotalPrice",
+      headerName: context.language === "en" ? "TotalPrice" : "الهاتف",
+      width: 250,
     },
   ];
 
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   dispatch(GetAllDataHandler()).then((res) => {
-  //     if (res.payload.status === 200) {
-  //       setData(res.payload.data);
-  //     }
-  //     dispatch(GetOrdersHandler()).then((res) => {
-  //       setOrders(res.payload.data.orders);
-  //     });
-  //   });
-  // }, []);
+  useEffect(() => {
+    dispatch(GetUsersHandler()).then(res => {
+      if (res.payload.status === 200) {
+        setUsers(res.payload.data.allUsers.length);
+      }
+    })
+    dispatch(GetOrdersHandler()).then(res => {
+      if (res.payload.status === 200) {
+        setOrders(res.payload.data.orders)
+      }
+    })
+    dispatch(GetReportsHandler()).then(res => {
+      if (res.payload.status === 200) {
+        setReports(res.payload.data.reports.length);
+      }
+    });
+    dispatch(GetProductsHandler()).then(res => {
+      if (res.payload) {
+        if (res.payload.status === 200) {
+          setProducts(res.payload.data.products.length)
+        }
+      }
+    })
+  }, [dispatch]);
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -184,8 +186,7 @@ const Dashboard = () => {
         ) : (
           <StatBox
             title={context.language === "en" ? "Total Clients" : "جميع العملاء"}
-            value={data ? data.Clients.totalClients : 0}
-            increase={`${data ? Math.round(data.Clients.percentage) : 0}%`}
+            value={users ? users : 0}
             description="All Clients"
             icon={
               <MovingOutlined
@@ -208,14 +209,9 @@ const Dashboard = () => {
           />
         ) : (
           <StatBox
-            title={context.language === "en" ? "Income" : "المكسب"}
-            value={data ? data.InCome.currentMonth : 0}
-            increase={`${data ? Math.round(data.InCome.percentage) : 0}%`}
-            description={`${
-              context.language === "en" ? "Last Month" : "الشهر السابق"
-            } (${
-              data ? data.InCome.totalInCome - data.InCome.currentMonth : 0
-            })`}
+            title={context.language === "en" ? "Total Products" : "المكسب"}
+            value={products ? products : 0}
+            description={`All Products`}
             icon={
               <PointOfSale
                 sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
@@ -223,34 +219,7 @@ const Dashboard = () => {
             }
           />
         )}
-        <Box
-          gridColumn="span 8"
-          gridRow="span 2"
-          backgroundColor={theme.palette.background.alt}
-          p="1rem"
-          borderRadius="0.55rem"
-        >
-          <Box display={"flex"} flexDirection={"column"} height={"100%"}>
-            <Header
-              title={
-                context.language === "en" ? "Orders Table" : "جدول الطلبات"
-              }
-            />
-            <DataGrid
-              autoPageSize
-              disableSelectionOnClick
-              loading={state.loading}
-              sx={{color: 'black'}}
-              localeText={context.language === "en" ? null : arabicLocaleText}
-              rows={orders.slice(0, 5).map((user, index) => ({
-                id: index + 1,
-                ...user,
-              }))}
-              columns={ordersColumns}
-            />
-          </Box>
-        </Box>
-        {state.loading ? (
+                {state.loading ? (
           <Skeleton
             sx={{
               p: "1.25rem 1rem",
@@ -264,16 +233,11 @@ const Dashboard = () => {
           />
         ) : (
           <StatBox
-            title={context.language === "en" ? "New Clients" : "عملاء جدد"}
-            value={data ? data.clients.totalClients : 0}
-            increase={`${data ? Math.round(data.clients.percentage) : 0}%`}
-            description={`${
-              context.language === "en" ? "Last Month" : "الشهر السابق"
-            } (${
-              data ? data.clients.totalClients - data.clients.currentMonth : 0
-            })`}
+            title={context.language === "en" ? "Total Reports" : "عملاء جدد"}
+            value={reports ? reports : 0}
+            description={`All Reports`}
             icon={
-              <PersonAdd
+              <WarningAmberOutlined
                 sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
               />
             }
@@ -294,13 +258,8 @@ const Dashboard = () => {
         ) : (
           <StatBox
             title={context.language === "en" ? "Orders" : "طلبات"}
-            value={data ? data.orders.currentMonth : 0}
-            increase={`${data ? Math.round(data.orders.percentage) : 0}%`}
-            description={`${
-              context.language === "en" ? "Last Month" : "الشهر السابق"
-            } (${
-              data ? data.orders.totalOrders - data.orders.currentMonth : 0
-            })`}
+            value={orders.length ? orders.length : 0}
+            description={`Total Orders`}
             icon={
               <LocalShippingOutlined
                 sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
@@ -308,6 +267,34 @@ const Dashboard = () => {
             }
           />
         )}
+        <Box
+          gridColumn="span 12"
+          gridRow="span 2"
+          backgroundColor={theme.palette.background.alt}
+          p="1rem"
+          borderRadius="0.55rem"
+        >
+          <Box display={"flex"} flexDirection={"column"} height={"100%"} >
+            <Header
+              title={
+                context.language === "en" ? "Orders Table" : "جدول الطلبات"
+              }
+            />
+            <DataGrid
+              autoPageSize
+              disableSelectionOnClick
+              loading={state.loading}
+              sx={{color: 'black'}}
+              localeText={context.language === "en" ? null : arabicLocaleText}
+              rows={orders.slice(0, 5).map((user, index) => ({
+                id: index + 1,
+                ...user,
+              }))}
+              columns={ordersColumns}
+            />
+          </Box>
+        </Box>
+
 
         {/* ROW 2 */}
         <Box

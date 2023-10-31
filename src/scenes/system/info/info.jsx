@@ -98,7 +98,7 @@ const Info = () => {
             flexDirection={"column"}
             p={2}
             gap={2}
-            sx={{ backgroundColor: "green", borderRadius: 5 }}
+            sx={{ backgroundColor: "#7BB18D", borderRadius: 5 }}
           >
             <Header
               title={"Please Enter Home Page Introduction Data Below: "}

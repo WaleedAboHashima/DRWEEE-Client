@@ -156,7 +156,10 @@ const Countries = () => {
           </Button>
         </Box>
       </Box>
-      <Box mt="40px" height="75vh">
+      <Box mt="40px" height="75vh"
+        sx={{ "& .MuiTablePagination-root ": { color: "black" } }}
+      
+      >
         <DataGrid
           autoPageSize
           disableSelectionOnClick

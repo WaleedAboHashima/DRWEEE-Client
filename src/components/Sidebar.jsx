@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import {
   Box,
   Collapse,
+  Divider,
   Drawer,
   IconButton,
   List,
@@ -29,6 +30,7 @@ import {
   ExpandMore,
   WarningOutlined,
   InfoOutlined,
+  ArchiveOutlined,
 } from "@mui/icons-material";
 import { useState } from "react";
 import FlexBetween from "./FlexBetween";
@@ -62,7 +64,7 @@ const CustomList = ({ navItems }) => {
               sx={{
                 borderRadius: "50px 0px 0px 50px",
                 backgroundColor:
-                  location.pathname === `/${navItem.url}` && "#FFFFFF",
+                  location.pathname === `/${navItem.url}` && "#A9DFBF",
               }}
               onClick={() =>
                 !navItem.url
@@ -72,19 +74,20 @@ const CustomList = ({ navItems }) => {
             >
               <ListItemIcon
                 sx={{
-                  color: location.pathname === `/${navItem.url}` && navItem.text ==="Dashboard" ? "#2F8608" : "",
+                  color: location.pathname === `/${navItem.url}` && navItem.text ==="Dashboard" ? "#2F8608" : "#00000080",
                 }}
               >
                 {navItem.icon}
               </ListItemIcon>
               <ListItemText
                 sx={{
-                  color: location.pathname === `/${navItem.url}` && navItem.text ==="Dashboard" ? "#2F8608" : "",
+                  color: location.pathname === `/${navItem.url}` && navItem.text ==="Dashboard" ? "#2F8608" : "#00000080",
+                  fontWeight: location.pathname === `/${navItem.url}` && navItem.text ==="Dashboard" ? "bold" : "",
                 }}
               >
                 {navItem.text}
               </ListItemText>
-              {!navItem.url ? isOpen ? <ExpandLess /> : <ExpandMore /> : ""}
+              {!navItem.url ? isOpen ? <ExpandLess  sx={{color: '#00000080'}} /> : <ExpandMore sx={{color: '#00000080'}} /> : ""}
             </ListItemButton>
             {navItem.components &&
               navItem.components.map((component, componentIndex) => {
@@ -101,12 +104,12 @@ const CustomList = ({ navItems }) => {
                         sx={{
                           borderRadius: "50px 0px 0px 50px",
                           pl: 4,
-                          backgroundColor: isActive && "#FFFFFF",
-                          color: isActive && "#2F8608",
+                          backgroundColor: isActive && "#A9DFBF",
+                          color: isActive ? "#2F8608" : '#00000080',
                         }}
                         onClick={() => navigate(`${component.url}`)}
                       >
-                        <ListItemIcon sx={{ color: isActive && "#2F8608" }}>
+                        <ListItemIcon sx={{ color: isActive ? "#2F8608" : "#00000080" }}>
                           {component.icon}
                         </ListItemIcon>
                         <ListItemText primary={component.text} />
@@ -170,6 +173,11 @@ const Sidebar = ({
           text: context.language === "en" ? "Orders" : "الفواتير",
           icon: <ReceiptLongOutlined />,
           url: "orders",
+        },
+        {
+          text: context.language === "en" ? "Archive" : "ارشيف" ,
+          icon: <ArchiveOutlined />,
+          url: "archive",
         },
         {
           text: context.language === "en" ? "Reports" : "التقارير",

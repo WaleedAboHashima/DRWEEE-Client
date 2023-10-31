@@ -1,35 +1,27 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { baseURL } from "constant/index";
 import axios from "axios";
+import {baseURL} from "constant/index";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
 const initialState = {
   data: [],
-  loading: false,
   state: "",
   status: null,
+  loading: false,
   error: "",
 };
 
-const api = `${baseURL}/api/accountant/report?type=`;
+const api = `${baseURL}/api/main/order/`;
 
-export const GetReportsHandler = createAsyncThunk(
-  "ReportData/GetReportsHandler",
+export const ArchiveOrderHandler = createAsyncThunk(
+  "OrdersData/ArchiveOrderHandler",
   async (arg) => {
     try {
-      const response = await axios.post(
-        api + arg.type,
-        {
-          day: arg.day,
-          month: arg.month,
-          year: arg.year,
-        },
-        {
-          headers: { Authorization: `Bearer ${cookies.get("_auth_token")}` },
-        }
-      );
+      const response = await axios.patch(api + arg.id, {
+        headers: { Authorization: `Bearer ${cookies.get("_auth_token")}` },
+      });
       return {
         data: response.data,
         status: response.status,
@@ -43,42 +35,42 @@ export const GetReportsHandler = createAsyncThunk(
   }
 );
 
-const GetReportsSlice = createSlice({
-  name: "ReportData",
+const ProductsSlice = createSlice({
+  name: "OrdersData",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(GetReportsHandler.fulfilled, (state, action) => {
+    builder.addCase(ArchiveOrderHandler.fulfilled, (state, action) => {
       state.loading = true;
       if (action.payload.status === 200) {
         state.data = action.payload.data;
-        state.loading = false;
+        state.status = action.payload.status;
         state.state = "Success";
         state.error = "";
-        state.status = action.payload.status;
+        state.loading = false;
       } else {
         state.data = [];
+        state.status = action.payload.status;
         state.loading = false;
         state.state = "Error";
-        state.status = action.payload.status;
         state.error = action.payload.message;
       }
     });
-    builder.addCase(GetReportsHandler.pending, (state) => {
+    builder.addCase(ArchiveOrderHandler.pending, (state) => {
       state.loading = true;
-      state.state = "Pending";
       state.data = [];
-      state.status = null;
       state.error = "";
+      state.status = null;
+      state.state = "Pending";
     });
-    builder.addCase(GetReportsHandler.rejected, (state) => {
+    builder.addCase(ArchiveOrderHandler.rejected, (state) => {
       state.loading = false;
-      state.state = "Rejected";
       state.data = [];
-      state.status = 500;
       state.error = "Server Error";
+      state.state = "Rejected";
+      state.status = 500;
     });
   },
 });
 
-export default GetReportsSlice.reducer;
+export default ProductsSlice.reducer;

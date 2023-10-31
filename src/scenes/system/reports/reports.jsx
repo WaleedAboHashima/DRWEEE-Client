@@ -41,7 +41,7 @@ const Reports = () => {
     {
       field: "id",
       headerName: "ID",
-      width: 300
+      width: 300,
     },
     {
       field: "email",
@@ -116,7 +116,11 @@ const Reports = () => {
           }
         />
       </Box>
-      <Box mt="40px" height="75vh">
+      <Box
+        mt="40px"
+        height="75vh"
+        sx={{ "& .MuiTablePagination-root ": { color: "black" } }}
+      >
         <DataGrid
           autoPageSize
           disableSelectionOnClick
