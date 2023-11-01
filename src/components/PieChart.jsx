@@ -1,9 +1,7 @@
 import { useTheme } from "@emotion/react";
 import { ResponsivePie } from "@nivo/pie";
 import { useDispatch } from "react-redux";
-import { useEffect } from "react";
 import { useState } from "react";
-import { GetServicesHandler } from "apis/Services/GetServices";
 
 const PieChart = ({ isDashboard = false }) => {
   const theme = useTheme();

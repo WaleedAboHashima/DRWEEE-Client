@@ -4,10 +4,6 @@ import globalReducer from "./global/index";
 import LoginReducer from "./auth/Login";
 //Users
 import GetAllUserReducer from "./data/Users/GetUsers";
-//Services
-import GetServicesReducer from "./Services/GetServices";
-import AddServicesReducer from "./Services/AddServices";
-import DeleteServicesReducer from "./Services/GetServices";
 
 import AddProductsReducer from "./data/Products/AddProducts";
 export default configureStore({
@@ -18,10 +14,6 @@ export default configureStore({
     //Dashboard
     //Users
     GetUsers: GetAllUserReducer,
-    //Services
-    GetServices: GetServicesReducer,
-    DeleteServices: DeleteServicesReducer,
-    AddServices: AddServicesReducer,
     //Products
     AddProducts: AddProductsReducer,
   },

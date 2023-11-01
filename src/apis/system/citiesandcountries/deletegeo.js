@@ -1,25 +1,25 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {baseURL} from "constant/index";
 import axios from "axios";
+import {baseURL} from "constant/index";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
 const initialState = {
   data: [],
-  loading: false,
   state: "",
   status: null,
+  loading: false,
   error: "",
 };
 
-const api = `${baseURL}/api/services/`;
+const api = `${baseURL}/api/main/country/`;
 
-export const GetServiceHandler = createAsyncThunk(
-  "ServicesList/GetServiceHandler",
+export const DeleteCountryHandler = createAsyncThunk(
+  "CountryData/DeleteCountryHandler",
   async (arg) => {
     try {
-      const response = await axios.get(api + arg.id, {
+      const response = await axios.delete(api + arg.id, {
         headers: { Authorization: `Bearer ${cookies.get("_auth_token")}` },
       });
       return {
@@ -35,42 +35,42 @@ export const GetServiceHandler = createAsyncThunk(
   }
 );
 
-const GetServiceSlice = createSlice({
-  name: "ServicesList",
+const CountrySlice = createSlice({
+  name: "CountryData",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(GetServiceHandler.fulfilled, (state, action) => {
+    builder.addCase(DeleteCountryHandler.fulfilled, (state, action) => {
       state.loading = true;
       if (action.payload.status === 200) {
         state.data = action.payload.data;
-        state.loading = false;
+        state.status = action.payload.status;
         state.state = "Success";
         state.error = "";
-        state.status = action.payload.status;
+        state.loading = false;
       } else {
         state.data = [];
+        state.status = action.payload.status;
         state.loading = false;
         state.state = "Error";
-        state.status = action.payload.status;
         state.error = action.payload.message;
       }
     });
-    builder.addCase(GetServiceHandler.pending, (state) => {
+    builder.addCase(DeleteCountryHandler.pending, (state) => {
       state.loading = true;
-      state.state = "Pending";
       state.data = [];
-      state.status = null;
       state.error = "";
+      state.status = null;
+      state.state = "Pending";
     });
-    builder.addCase(GetServiceHandler.rejected, (state) => {
+    builder.addCase(DeleteCountryHandler.rejected, (state) => {
       state.loading = false;
-      state.state = "Rejected";
       state.data = [];
-      state.status = 500;
       state.error = "Server Error";
+      state.state = "Rejected";
+      state.status = 500;
     });
   },
 });
 
-export default GetServiceSlice.reducer;
+export default CountrySlice.reducer;

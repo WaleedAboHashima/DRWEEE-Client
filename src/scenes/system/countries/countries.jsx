@@ -1,20 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   IconButton,
-  MenuItem,
-  Select,
-  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -24,18 +17,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { LanguageContext } from "language";
 import {
   Delete,
-  Edit,
   AddOutlined,
-  SellOutlined,
-  CloseOutlined,
-  MoreVertOutlined,
   LocationCityOutlined,
   LocationOnOutlined,
 } from "@mui/icons-material";
 import Cookies from "universal-cookie";
 import { useNavigate } from "react-router-dom";
-import { GetUsersHandler } from "apis/data/Users/GetUsers";
 import { GetGeoHandler } from "apis/system/citiesandcountries/getgeo";
+import { DeleteCountryHandler } from "apis/system/citiesandcountries/deletegeo";
 
 const Countries = () => {
   const theme = useTheme();
@@ -43,19 +32,15 @@ const Countries = () => {
   const [rows, setRows] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const context = useContext(LanguageContext);
-  const [isOpen, setisOpen] = useState(false);
   const [userdetails, setUserdetails] = useState({});
+  const [citiesData, setCitiesData] = useState([]);
+  const [govData, setGoveData] = useState([]);
   const cookies = new Cookies();
-  const [type, setType] = useState(0);
   const navigator = useNavigate();
-  const [orders, setOrders] = useState([]);
-  const [editOpen, setEditOpen] = useState(false);
-  const [name, setName] = useState();
-  const [salary, setSalary] = useState();
-  const [percentage, setPercentage] = useState();
-  const [way, setWay] = useState("fixed");
+  const [cityOpen, setCityOpen] = useState(false);
+  const [govOpen, setGoveOpen] = useState(false);
+  const [error, setError] = useState("");
   const state = useSelector((state) => state.GetUsers);
-
   const columns = [
     {
       field: "id",
@@ -64,14 +49,19 @@ const Countries = () => {
     {
       field: "Name",
       headerName: context.language === "en" ? "Name" : "لاسم",
-      width: 250,
+      width: 450,
     },
     {
       field: "Cities",
       headerName: context.language === "en" ? "Cities" : "مدن",
-      width: 250,
-      renderCell: ({ row: cities }) => (
-        <IconButton>
+      width: 450,
+      renderCell: ({ row: { Cities } }) => (
+        <IconButton
+          onClick={() => {
+            setCitiesData(Cities);
+            setCityOpen(!cityOpen);
+          }}
+        >
           <LocationCityOutlined color="success" />
         </IconButton>
       ),
@@ -79,25 +69,28 @@ const Countries = () => {
     {
       field: "Governemnets",
       headerName: context.language === "en" ? "Governments" : "محافظات",
-      width: 250,
-      renderCell: ({row: governments}) => (
-        <IconButton>
-          <LocationOnOutlined color="success"/>
+      width: 450,
+      renderCell: ({ row: { Governments } }) => (
+        <IconButton
+          onClick={() => {
+            setGoveData(Governments);
+            setGoveOpen(!govOpen);
+          }}
+        >
+          <LocationOnOutlined color="success" />
         </IconButton>
-      )
+      ),
     },
     {
       field: "actions",
       headerName: context.language === "en" ? "Actions" : "الاجرائات",
-      renderCell: ({
-        row: { _id, name, type, orders, salary, percentage, way },
-      }) => {
+      renderCell: ({ row: { _id, Name } }) => {
         return (
           <Box>
             <IconButton
               onClick={() => {
-                setUserdetails({ _id, name });
-                // setFormOpen(true);
+                setUserdetails({ _id, Name });
+                setFormOpen(true);
               }}
             >
               <Delete color="error" />
@@ -108,10 +101,22 @@ const Countries = () => {
     },
   ];
 
+  const handleDelete = () => {
+    dispatch(DeleteCountryHandler({ id: userdetails._id })).then((res) => {
+      if (res.payload.data) {
+        window.location.reload();
+      } else {
+        setError(res.payload.message);
+      }
+    });
+  };
+
   useEffect(() => {
     dispatch(GetGeoHandler()).then((res) => {
-      if (res.payload.data.success) {
-        setRows(res.payload.data.rules.Countries);
+      if (res.payload.data) {
+        if (res.payload.data.success) {
+          setRows(res.payload.data.rules.Countries);
+        }
       }
     });
   }, [dispatch]);
@@ -156,9 +161,10 @@ const Countries = () => {
           </Button>
         </Box>
       </Box>
-      <Box mt="40px" height="75vh"
+      <Box
+        mt="40px"
+        height="75vh"
         sx={{ "& .MuiTablePagination-root ": { color: "black" } }}
-      
       >
         <DataGrid
           autoPageSize
@@ -184,18 +190,18 @@ const Countries = () => {
         <DialogTitle id="alert-dialog-title">
           {context.language === "en" ? (
             <Box>
-              Delete <span style={{ color: "red" }}>{userdetails.name}?</span>
+              Delete <span style={{ color: "red" }}>{userdetails.Name}?</span>
             </Box>
           ) : (
             <Box>
-              حذف <span style={{ color: "red" }}>{userdetails.name}؟</span>
+              حذف <span style={{ color: "red" }}>{userdetails.Name}؟</span>
             </Box>
           )}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             {context.language === "en"
-              ? "Are you sure you want to delete this employee?"
+              ? "Are you sure you want to delete this Country?"
               : "هل انت متأكد بأنك تريد ازاله هذا الموظف؟"}
           </DialogContentText>
         </DialogContent>
@@ -204,215 +210,61 @@ const Countries = () => {
             {" "}
             {context.language === "en" ? "Cancel" : "الغاء"}
           </Button>
-          <Button autoFocus color="error">
+          <Button onClick={() => handleDelete()} autoFocus color="error">
             {context.language === "en" ? "Delete" : "حذف"}
           </Button>
         </DialogActions>
       </Dialog>
       <Dialog
-        fullScreen
-        open={isOpen}
-        onClose={() => setisOpen(!isOpen)}
+        fullWidth
+        dir={context.language === "en" ? "ltr" : "rtl"}
+        open={govOpen}
+        onClose={() => setGoveOpen(!govOpen)}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle
-          id="alert-dialog-title"
-          display={"flex"}
-          justifyContent={"space-between"}
-        >
-          <span style={{ color: "white" }}>
-            Orders for the user : {userdetails.name}
-          </span>
-          <IconButton
-            onClick={() => {
-              setisOpen(false);
-              setOrders([]);
-            }}
-          >
-            <CloseOutlined />
-          </IconButton>
-        </DialogTitle>
+        <DialogTitle>Governments:</DialogTitle>
         <DialogContent>
-          <Box display={"flex"} flexWrap={"wrap"} gap={20}>
-            {orders ? (
-              orders.map((order) => (
-                <Card sx={{ width: 345, maxWidth: 345 }}>
-                  <CardHeader
-                    avatar={
-                      <Avatar sx={{ bgcolor: "white" }} aria-label="recipe">
-                        R
-                      </Avatar>
-                    }
-                    action={
-                      <IconButton aria-label="settings">
-                        <MoreVertOutlined />
-                      </IconButton>
-                    }
-                    title={order.service.name}
-                    subheader={order.amount_paid}
-                  />
-                  <Box
-                    display={"flex"}
-                    flexWrap={"wrap"}
-                    justifyContent={"space-between"}
-                    flexDirection={"column"}
-                    gap={3}
-                    p={3}
-                  >
-                    <Typography>
-                      Client Name : {`${order.client.full_name}`}
-                    </Typography>
-                    <Typography>Client Code : {order.client.code}</Typography>
-                    <Typography>Doctors : {order.doctor.name}</Typography>
-                    <Typography>
-                      Assistances :{" "}
-                      {order.assistances.map((assistance) => assistance.name)}
-                    </Typography>
-                    <Typography>
-                      Addtional Info :
-                      <br />
-                      {order.addtionalInfo.map((info) => {
-                        const keyValuePairs = Object.entries(info);
-                        const result = keyValuePairs.map(
-                          ([key, value], index) => (
-                            <Box key={index} display={"flex"}>
-                              <Typography>
-                                {key} : {value}
-                              </Typography>
-                            </Box>
-                          )
-                        );
-                        return result;
-                      })}
-                    </Typography>
-                  </Box>
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary">
-                      Time : {order.time}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Date : {order.date}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Finished : {order.done ? "Yes" : "No"}
-                    </Typography>
-                  </CardContent>
-                </Card>
+          <Box display={"flex"} gap={2} flexDirection={"column"}>
+            {govData[0] !== "" ? (
+              govData.map((gov, index) => (
+                <Typography key={index}>{gov}</Typography>
               ))
             ) : (
-              <Box
-                display={"flex"}
-                justifyContent={"center"}
-                alignItems={"center"}
-                width={"100%"}
-                height={"100%"}
-              >
-                No Orders Found
-              </Box>
+              <Typography>No Governements for this country</Typography>
             )}
-          </Box>
-        </DialogContent>
-      </Dialog>
-      <Dialog
-        dir={context.language === "en" ? "ltr" : "rtl"}
-        open={editOpen}
-        onClose={() => setEditOpen(!editOpen)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {context.language === "en" ? (
-            <Box>
-              Edit{" "}
-              <span style={{ color: theme.palette.primary[400] }}>
-                {userdetails.name}?
-              </span>
-            </Box>
-          ) : (
-            <Box>
-              تعديل{" "}
-              <span style={{ color: theme.palette.primary[400] }}>
-                {userdetails.name}؟
-              </span>
-            </Box>
-          )}
-        </DialogTitle>
-        <DialogContent>
-          <Box
-            display={"flex"}
-            alignItems={"center"}
-            gap={2}
-            flexDirection={"column"}
-          >
-            <TextField
-              fullWidth
-              dir={context.language === "en" ? "ltr" : "rtl"}
-              placeholder={
-                context.language === "en"
-                  ? `Name: ${userdetails.name}`
-                  : `الاسم: ${userdetails.name}`
-              }
-              onChange={(e) => setName(e.target.value)}
-            />
-            {way === "fixed" ? (
-              <TextField
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                fullWidth
-                placeholder={
-                  context.language === "en"
-                    ? `Salary: ${userdetails.salary}`
-                    : `المرتب: ${userdetails.salary}`
-                }
-                onChange={(e) => setSalary(e.target.value)}
-              />
-            ) : (
-              <TextField
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                fullWidth
-                placeholder={
-                  context.language === "en"
-                    ? `Percentage %: ${userdetails.percentage}`
-                    : `النسبه : ${userdetails.percentage} %`
-                }
-                onChange={(e) => setPercentage(e.target.value)}
-              />
-            )}
-            <Select
-              sx={
-                context.language === "ar" && {
-                  "& .MuiSvgIcon-root": {
-                    left: "7px",
-                    right: "auto",
-                  },
-                }
-              }
-              fullWidth
-              value={way}
-              onChange={(e) => setWay(e.target.value)}
-            >
-              <MenuItem
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                value={"fixed"}
-              >
-                {context.language === "en" ? "Fixed" : "ثابت"}
-              </MenuItem>
-              <MenuItem
-                dir={context.language === "en" ? "ltr" : "rtl"}
-                value={"com"}
-              >
-                {context.language === "en" ? "Commission" : "عموله"}
-              </MenuItem>
-            </Select>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditOpen(!editOpen)}>
-            {" "}
-            {context.language === "en" ? "Cancel" : "الغاء"}
+          <Button color="error" onClick={() => setGoveOpen(!govOpen)}>
+            {context.language === "en" ? "Close" : "الغاء"}
           </Button>
-          <Button autoFocus color="success">
-            {context.language === "en" ? "Edit" : "تعديل"}
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        fullWidth
+        dir={context.language === "en" ? "ltr" : "rtl"}
+        open={cityOpen}
+        onClose={() => setCityOpen(!cityOpen)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle>Cities:</DialogTitle>
+        <DialogContent>
+          <Box display={"flex"} gap={2} flexDirection={"column"}>
+            {citiesData[0] !== "" ? (
+              citiesData.map((city, index) => (
+                <Typography key={index}>{city}</Typography>
+              ))
+            ) : (
+              <Typography>No Cities for this country</Typography>
+            )}
+          </Box>
+          <Typography>{error}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button color="error" onClick={() => setCityOpen(!cityOpen)}>
+            {context.language === "en" ? "Close" : "الغاء"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,5 +1,12 @@
 import { useTheme } from "@emotion/react";
-import { Box, Button, MenuItem, Select, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
 import Header from "components/Header";
 import { LanguageContext } from "language";
 import React, { useContext, useEffect, useState } from "react";
@@ -39,12 +46,18 @@ const AddCC = () => {
 
   const handleAddGeo = () => {
     dispatch(
-      AddGeoInfo({ city: selectedCity.length > 1 && selectedCity, country: selectedCoutnry.length > 1 && selectedCoutnry, government })
+      AddGeoInfo({
+        city: selectedCity.length > 1 && selectedCity,
+        country: selectedCoutnry.length > 1 && selectedCoutnry,
+        government,
+      })
     ).then((res) => {
-      if (res.payload.data.success) {
-        // window.location = "/countries";
+      if (res.payload.data) {
+        if (res.payload.data.success) {
+          window.location = "/countries";
+        }
       } else {
-        setError(res.payload.data.message);
+        setError(res.payload.message);
       }
     });
   };
@@ -112,7 +125,7 @@ const AddCC = () => {
               }}
               MenuProps={MenuProps}
             >
-              <MenuItem disabled value={"0"}>
+              <MenuItem value={"0"}>
                 Select A Country
               </MenuItem>
               {countries.length &&
@@ -127,7 +140,7 @@ const AddCC = () => {
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
             >
-              <MenuItem disabled value={"0"}>
+              <MenuItem value={"0"}>
                 Select A City
               </MenuItem>
               {cities &&
@@ -142,6 +155,9 @@ const AddCC = () => {
               value={government}
               onChange={(e) => setGovernment(e.target.value)}
             />
+            <Typography color={"error"} textAlign={"center"} variant="h3">
+              {error}
+            </Typography>
             <Box
               width={"100%"}
               display={"flex"}
@@ -170,7 +186,6 @@ const AddCC = () => {
                 Add
               </Button>
             </Box>
-            <Typography variant="h3">{error}</Typography>
           </Box>
         </Box>
       </Box>
