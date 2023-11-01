@@ -66,7 +66,7 @@ const Login = () => {
     setError("");
     dispatch(LoginHandler({ email: email, password: password })).then((res) => {
       if (res.payload) {
-        if (res.payload.status === 200) {
+        if (res.payload.status === 200 && res.payload.data.success) {
           if (
             res.payload.data.user.role === "Owner" ||
             res.payload.data.user.role === "Admin"

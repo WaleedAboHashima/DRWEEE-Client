@@ -176,7 +176,7 @@ const Archive = () => {
       <Box
         mt="40px"
         height="75vh"
-        sx={{ "& .MuiTablePagination-root ": { color: "black" } }}
+        sx={{ "& .MuiTablePagination-root ": { color: "black" } , backgroundColor: 'white'}}
       >
         <DataGrid
           autoPageSize

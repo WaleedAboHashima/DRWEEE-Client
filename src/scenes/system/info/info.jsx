@@ -1,40 +1,29 @@
-import { useTheme } from "@emotion/react";
-import { AddOutlined, CloudUploadOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { CloudUploadOutlined } from "@mui/icons-material";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import Header from "components/Header";
 import { LanguageContext } from "language";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import InfoIcon from "assets/editInfo.svg";
 import { useDispatch } from "react-redux";
-import { GetCountriesHandler } from "apis/system/citiesandcountries";
+import { AddInfoHandler } from "apis/system/info/addInfo";
 const Info = () => {
   const context = useContext(LanguageContext);
-  const [role, setRole] = useState("");
-  const [countries, setCountires] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState("0");
-  const [selectedCity, setSelectedCity] = useState("0");
-  const [governement, setGovernement] = useState("");
   const [images, setImages] = useState([]);
+  const [txt, setTxt] = useState();
+  const [video, setVideo] = useState();
   const dispatch = useDispatch();
-  const ITEM_HEIGHT = 48;
-  const ITEM_PADDING_TOP = 8;
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 250,
-      },
-    },
+  const handleSubmit = () => {
+    const formData = new FormData();
+    formData.append("text", txt);
+    formData.append("video", video);
+    images.map(image => formData.append('images', image))
+    dispatch(AddInfoHandler(formData)).then((res) => {
+      if (res.payload.data) {
+        if (res.payload.status === 200) {
+          window.location = "/info";
+        }
+      }
+    });
   };
 
   const handleFileChange = (event) => {
@@ -42,22 +31,12 @@ const Info = () => {
     const imageArray = [];
 
     for (let i = 0; i < selectedFiles.length; i++) {
-      imageArray.push(URL.createObjectURL(selectedFiles[i]));
+      imageArray.push(selectedFiles[i]);
     }
 
     setImages(imageArray);
   };
 
-  useEffect(() => {
-    dispatch(GetCountriesHandler()).then((res) => {
-      if (res.payload.status === 200) {
-        if (res.payload.data.success) {
-          const countries = res.payload.data.data.countries;
-          setCountires(countries);
-        }
-      }
-    });
-  }, []);
   return (
     <Box m="1.5rem 2rem">
       <Box
@@ -103,22 +82,41 @@ const Info = () => {
             <Header
               title={"Please Enter Home Page Introduction Data Below: "}
             />
-            <TextField variant="outlined" multiline rows={6} placeholder="Please enter the home page info...." />
+            <TextField
+              onChange={(e) => setVideo(e.target.value)}
+              variant="outlined"
+              placeholder="Video URL EX: https://www.youtube.com/"
+            />
+            <TextField
+              onChange={(e) => setTxt(e.target.value)}
+              variant="outlined"
+              multiline
+              rows={6}
+              placeholder="Please enter the home page info...."
+            />
             {images.length > 0 ? (
               <Box
                 sx={{
                   width: "100%",
                   display: "flex",
-                  flexDirection: {xs: "column", lg: 'row'},
+                  flexDirection: { xs: "column", lg: "row" },
                   justifyContent: "center",
                   alignItems: "center",
                   gap: 2,
                 }}
               >
                 {images.map((image, index) => (
-                  <Box key={index} justifyContent={'center'} gap={2} alignItems={'center'} display={'flex'} width={'100%'} flexDirection={'column'}>
+                  <Box
+                    key={index}
+                    justifyContent={"center"}
+                    gap={2}
+                    alignItems={"center"}
+                    display={"flex"}
+                    width={"100%"}
+                    flexDirection={"column"}
+                  >
                     <img
-                      src={image}
+                      src={URL.createObjectURL(image)}
                       alt={`uploaded image ${index}`}
                       style={{
                         maxHeight: "100%",
@@ -211,7 +209,13 @@ const Info = () => {
               gap={2}
               justifyContent={"right"}
             >
-              <Button variant="contained">Add</Button>
+              <Button
+                onClick={() => handleSubmit()}
+                disabled={video && txt && images.length > 0 ? false : true}
+                variant="contained"
+              >
+                Add
+              </Button>
             </Box>
           </Box>
         </Box>
