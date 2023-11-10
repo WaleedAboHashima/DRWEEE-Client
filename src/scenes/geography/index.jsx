@@ -4,12 +4,21 @@ import Header from "components/Header";
 import { LanguageContext } from "language";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { useDispatch } from "react-redux";
-import axios from "axios";
 import { GetOrdersHandler } from "apis/data/Orders/GetOrders";
 
-const CustomMarker = ({ position, label, info, country }) => {
+const CustomMarker = ({ position, info }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const context = useContext(LanguageContext);
+  const [userInfo, setUserInfo] = useState([]);
+  useEffect(() => {
+    if (info.length > 0) {
+      const foundInfo = info.find(
+        (userInfo) =>
+          parseFloat(userInfo.Location.lat) === position.lat &&
+          parseFloat(userInfo.Location.lng) === position.lng
+      );
+      setUserInfo(foundInfo);
+    }
+  }, [info, position.lat, position.lng]);
   const handleMouseOver = () => {
     setIsHovered(true);
   };
@@ -17,6 +26,7 @@ const CustomMarker = ({ position, label, info, country }) => {
   const handleMouseOut = () => {
     setIsHovered(false);
   };
+
   return (
     <>
       <Marker
@@ -24,30 +34,28 @@ const CustomMarker = ({ position, label, info, country }) => {
         onMouseOver={handleMouseOver}
         onMouseOut={handleMouseOut}
       />
-      {isHovered &&
-        info.map((info) => (
-          <Box
-            sx={{
-              position: "absolute",
-              zIndex: 1,
-              background: "white",
-              padding: "8px",
-              borderRadius: "4px",
-              color: "black",
-              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-              top: 30,
-              left: 30
-            }}
-          >
-            <Typography> Name : {info.Name}</Typography>
-            <Typography>Phone: {info.Phone}</Typography>
-            <Typography>Address: {info.Address}</Typography>
-          </Box>
-        ))}
+      {isHovered && (
+        <Box
+          sx={{
+            position: "absolute",
+            zIndex: 1,
+            background: "white",
+            padding: "8px",
+            borderRadius: "4px",
+            color: "black",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            top: 30,
+            left: 30,
+          }}
+        >
+          <Typography>Name: {userInfo.Name}</Typography>
+          <Typography>Phone: {userInfo.Phone}</Typography>
+          <Typography>Address: {userInfo.Address}</Typography>
+        </Box>
+      )}
     </>
   );
 };
-
 const Geography = () => {
   const theme = useTheme();
   const context = useContext(LanguageContext);
@@ -56,7 +64,6 @@ const Geography = () => {
   const [loading, setLoading] = useState(true);
   const [info, setInfo] = useState({});
   const [locations, setLocations] = useState([{ lat: "", lng: "" }]);
-
   const mapOptions = {
     disableDefaultUI: true, // Hide default controls
     // streetViewControl: true,
@@ -147,5 +154,4 @@ const Geography = () => {
     </Box>
   );
 };
-
 export default Geography;

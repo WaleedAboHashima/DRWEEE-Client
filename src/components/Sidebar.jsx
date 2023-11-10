@@ -31,6 +31,7 @@ import {
   WarningOutlined,
   InfoOutlined,
   ArchiveOutlined,
+  BackHandOutlined,
 } from "@mui/icons-material";
 import { useState } from "react";
 import FlexBetween from "./FlexBetween";
@@ -152,6 +153,11 @@ const Sidebar = ({
           text: context.language === "en" ? "Products" : "المواعيد",
           icon: <ListOutlined />,
           url: "products",
+        },
+        {
+          text: context.language === "en" ? "Requests" : "الطلبات",
+          icon: <BackHandOutlined />,
+          url: "requests",
         },
         {
           text: context.language === "en" ? "Geography" : "الموقع الجغرافي",

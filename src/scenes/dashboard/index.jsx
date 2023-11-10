@@ -297,7 +297,7 @@ const Dashboard = () => {
 
 
         {/* ROW 2 */}
-        <Box
+        {/* <Box
           gridColumn="span 6"
           gridRow="span 2"
           backgroundColor={theme.palette.background.alt}
@@ -457,7 +457,7 @@ const Dashboard = () => {
         >
           <Header title={"Services Chart"} />
           <BarChart />
-        </Box>
+        </Box> */}
       </Box>
     </Box>
   );

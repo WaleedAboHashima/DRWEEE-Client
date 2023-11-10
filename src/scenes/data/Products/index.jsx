@@ -34,20 +34,15 @@ const Products = () => {
   const [rows, setRows] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const context = useContext(LanguageContext);
-  const [userdetails, setUserdetails] = useState({});
   const cookies = new Cookies();
   const [image, setImage] = useState();
   const [points, setPoints] = useState("");
   const [errorMessage, setError] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [type, setType] = useState(0);
   const navigator = useNavigate();
-  const [orders, setOrders] = useState([]);
   const [editOpen, setEditOpen] = useState(false);
-  const [name, setName] = useState();
-  const [salary, setSalary] = useState();
-  const [percentage, setPercentage] = useState();
+  const [name, setName] = useState("");
   const [way, setWay] = useState("fixed");
   const [productDetails, setProductData] = useState("");
   const state = useSelector((state) => state.GetUsers);
@@ -202,7 +197,10 @@ const Products = () => {
       <Box
         mt="40px"
         height="75vh"
-        sx={{ "& .MuiTablePagination-root ": { color: "black" }, backgroundColor: 'white' }}
+        sx={{
+          "& .MuiTablePagination-root ": { color: "black" },
+          backgroundColor: "white",
+        }}
       >
         <DataGrid
           autoPageSize
