@@ -247,9 +247,9 @@ const Sidebar = ({
                 {!isNonMobile && (
                   <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
                     {context.language === "en" ? (
-                      <ChevronLeft />
+                      <ChevronLeft color="primary" />
                     ) : (
-                      <ChevronRight />
+                      <ChevronRight color="primary" />
                     )}
                   </IconButton>
                 )}
