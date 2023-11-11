@@ -29,6 +29,7 @@ import {
   MoreHorizOutlined,
   DoneOutlineOutlined,
   CheckOutlined,
+  RemoveRedEyeOutlined,
 } from "@mui/icons-material";
 import { LanguageContext } from "language";
 import Cookies from "universal-cookie";
@@ -36,6 +37,48 @@ import { useDispatch } from "react-redux";
 import { GetOrdersHandler } from "apis/data/Orders/GetOrders";
 import { ArchiveOrderHandler } from "apis/data/Orders/ArchiveOrder";
 import { ChangeOrderStatusHandler } from "apis/data/Orders/ChangeStatus";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { useTheme } from "@emotion/react";
+
+const CustomMarker = ({ position, info }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const handleMouseOver = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseOut = () => {
+    setIsHovered(false);
+  };
+  return (
+    <>
+      <Marker
+        position={position}
+        onMouseOver={handleMouseOver}
+        onMouseOut={handleMouseOut}
+      />
+      {isHovered && (
+        <Box
+          sx={{
+            position: "absolute",
+            zIndex: 1,
+            background: "white",
+            padding: "8px",
+            borderRadius: "4px",
+            color: "black",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            top: 30,
+            left: 30,
+          }}
+        >
+          <Typography> Name : {info.Name}</Typography>
+          <Typography>Phone: {info.Phone}</Typography>
+          <Typography>Address: {info.Address}</Typography>
+        </Box>
+      )}
+    </>
+  );
+};
+
 const Orders = () => {
   const context = useContext(LanguageContext);
   const [isOpen, setisOpen] = useState(false);
@@ -43,6 +86,12 @@ const Orders = () => {
   const [orderDetails, setOrderDetails] = useState({});
   const [status, setStatus] = useState(0);
   const [orders, setOrders] = useState([]);
+  const [productDetails, setProductDetails] = useState({
+    Products: [],
+    User: { Location: {} },
+  });
+  const [editOpen, setEditOpen] = useState(false);
+  const theme = useTheme();
   const dispatch = useDispatch();
   const columns = [
     {
@@ -119,9 +168,10 @@ const Orders = () => {
       width: 250,
     },
     {
+      width: 275,
       field: "actions",
       headerName: context.language === "en" ? "Actions" : "الاجرائات",
-      renderCell: ({ row: { _id } }) => {
+      renderCell: ({ row: { _id, Products, User } }) => {
         return (
           <Box>
             <IconButton
@@ -131,6 +181,17 @@ const Orders = () => {
               }}
             >
               <Edit sx={{ color: "green" }} />
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                setProductDetails({
+                  Products: Products,
+                  User: User,
+                });
+                setEditOpen(true);
+              }}
+            >
+              <RemoveRedEyeOutlined color="primary" />
             </IconButton>
             <IconButton
               onClick={() => {
@@ -144,6 +205,53 @@ const Orders = () => {
       },
     },
   ];
+  const prodColumns = [
+    {
+      field: "id",
+      headerName: "ID",
+    },
+    {
+      field: "Image",
+      headerName: context.language === "en" ? "Image" : "البريد الألكتروني",
+      renderCell: ({ row }) => (
+        <img
+          src={row.Image}
+          style={{ padding: "5px 0", borderRadius: "10px" }}
+          alt={"Product Image"}
+          width="60%"
+          height="150%"
+        />
+      ),
+      width: 175,
+    },
+    {
+      field: "Name",
+      headerName: context.language === "en" ? "Name" : "لاسم",
+      width: 250,
+    },
+    {
+      field: "Points",
+      headerName: context.language === "en" ? "Points" : "الدور",
+      width: 200,
+    },
+    {
+      field: "Price",
+      headerName: context.language === "en" ? "Price" : "الدور",
+      width: 200,
+    },
+    {
+      field: "Description",
+      headerName: context.language === "en" ? "Description" : "الهاتف",
+      width: 400,
+    },
+  ];
+
+  const mapOptions = {
+    disableDefaultUI: true, // Hide default controls
+    // streetViewControl: true,
+    zoomControl: true, // Show zoom controls
+    // mapTypeId: "satellite", // Set default display to satellite view
+  };
 
   const handleEdit = () => {
     dispatch(ChangeOrderStatusHandler({ id: orderDetails._id, status })).then(
@@ -194,7 +302,10 @@ const Orders = () => {
       <Box
         mt="40px"
         height="75vh"
-        sx={{ "& .MuiTablePagination-root ": { color: "black" }, backgroundColor: 'white' }}
+        sx={{
+          "& .MuiTablePagination-root ": { color: "black" },
+          backgroundColor: "white",
+        }}
       >
         <DataGrid
           autoPageSize
@@ -240,6 +351,112 @@ const Orders = () => {
               SAVE
             </Button>
           </DialogActions>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        dir={context.language === "en" ? "ltr" : "rtl"}
+        open={editOpen}
+        fullScreen
+        onClose={() => {
+          setProductDetails({ Products: [], User: { Location: {} } });
+          setEditOpen(!editOpen);
+        }}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle
+          id="alert-dialog-title"
+          display={"flex"}
+          justifyContent={"space-between"}
+        >
+          {context.language === "en" ? (
+            <Box>
+              <span>{productDetails.Name}</span>
+            </Box>
+          ) : (
+            <Box>
+              تعديل{" "}
+              <span style={{ color: theme.palette.primary[400] }}>
+                {productDetails.Name}؟
+              </span>
+            </Box>
+          )}
+          <IconButton
+            onClick={() => {
+              setProductDetails({ Products: [], User: { Location: {} } });
+              setEditOpen(false);
+            }}
+          >
+            <CloseOutlined />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Box
+            width={"100%"}
+            display={"flex"}
+            flexDirection={"column"}
+            p={5}
+            gap={2}
+          >
+            <Box
+              display={"flex"}
+              flexDirection={"column"}
+              gap={2}
+              width={"100%"}
+              alignItems={"flex-start"}
+              height={"100vh"}
+            >
+              <Box height="40vh" width={"100%"} borderRadius="4px">
+                <LoadScript googleMapsApiKey="AIzaSyCewVD8Afv0cy6NGoCZkQ4PZRW3OQCFfHA">
+                  {!productDetails ? (
+                    <Box
+                      display={"flex"}
+                      justifyContent={"center"}
+                      alignItems={"center"}
+                      height={"100%"}
+                    >
+                      <CircularProgress />
+                    </Box>
+                  ) : (
+                    <GoogleMap
+                      options={mapOptions}
+                      mapContainerStyle={{ height: "100%", width: "100%" }}
+                      zoom={20}
+                      center={{
+                        lat: parseFloat(productDetails.User.Location.lat),
+                        lng: parseFloat(productDetails.User.Location.lng),
+                      }}
+                    >
+                      <CustomMarker
+                        position={{
+                          lat: parseFloat(productDetails.User.Location.lat),
+                          lng: parseFloat(productDetails.User.Location.lng),
+                        }}
+                        info={productDetails.User}
+                      />
+                    </GoogleMap>
+                  )}
+                </LoadScript>
+              </Box>
+              <Typography variant="h3" sx={{ textAlign: "center" }}>
+                Name: {productDetails.User.Name}
+              </Typography>
+              <Typography variant="h3" sx={{ textAlign: "center" }}>
+                Phone: {productDetails.User.Phone}
+              </Typography>
+              <Typography variant="h3" sx={{ textAlign: "center" }}>
+                Products:
+              </Typography>
+              <DataGrid
+                sx={{ width: "100%", height: "100%" }}
+                rows={productDetails.Products.map((prod, index) => ({
+                  id: index + 1,
+                  ...prod,
+                }))}
+                columns={prodColumns}
+              />
+            </Box>
+          </Box>
         </DialogContent>
       </Dialog>
     </Box>

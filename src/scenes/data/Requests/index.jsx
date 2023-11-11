@@ -348,10 +348,7 @@ const Requests = () => {
         >
           {context.language === "en" ? (
             <Box>
-              Edit{" "}
-              <span style={{ color: theme.palette.primary[400] }}>
-                {productDetails.Name}?
-              </span>
+              <span>{productDetails.Name}</span>
             </Box>
           ) : (
             <Box>
