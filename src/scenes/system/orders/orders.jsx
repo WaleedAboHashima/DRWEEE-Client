@@ -89,6 +89,7 @@ const Orders = () => {
   const [productDetails, setProductDetails] = useState({
     Products: [],
     User: { Location: {} },
+    Info: {}
   });
   const [editOpen, setEditOpen] = useState(false);
   const theme = useTheme();
@@ -171,7 +172,7 @@ const Orders = () => {
       width: 275,
       field: "actions",
       headerName: context.language === "en" ? "Actions" : "الاجرائات",
-      renderCell: ({ row: { _id, Products, User } }) => {
+      renderCell: ({ row: { _id, Products, User, Info } }) => {
         return (
           <Box>
             <IconButton
@@ -187,6 +188,7 @@ const Orders = () => {
                 setProductDetails({
                   Products: Products,
                   User: User,
+                  Info
                 });
                 setEditOpen(true);
               }}
@@ -358,7 +360,7 @@ const Orders = () => {
         open={editOpen}
         fullScreen
         onClose={() => {
-          setProductDetails({ Products: [], User: { Location: {} } });
+          setProductDetails({ Products: [], User: { Location: {} }, Info: {} });
           setEditOpen(!editOpen);
         }}
         aria-labelledby="alert-dialog-title"
@@ -383,7 +385,7 @@ const Orders = () => {
           )}
           <IconButton
             onClick={() => {
-              setProductDetails({ Products: [], User: { Location: {} } });
+              setProductDetails({ Products: [], User: { Location: {} }, Info: {} });
               setEditOpen(false);
             }}
           >
@@ -439,10 +441,13 @@ const Orders = () => {
                 </LoadScript>
               </Box>
               <Typography variant="h3" sx={{ textAlign: "center" }}>
-                Name: {productDetails.User.Name}
+                Username: {productDetails.Info.fullName}
               </Typography>
               <Typography variant="h3" sx={{ textAlign: "center" }}>
-                Phone: {productDetails.User.Phone}
+                Phone: {productDetails.Info.phone}
+              </Typography>
+              <Typography variant="h3" sx={{ textAlign: "center" }}>
+                Email: {productDetails.Info.email}
               </Typography>
               <Typography variant="h3" sx={{ textAlign: "center" }}>
                 Products:
