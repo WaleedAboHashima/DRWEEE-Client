@@ -22,6 +22,7 @@ import AddProduct from "scenes/data/Products/AddProduct";
 import AddCC from "scenes/system/countries/AddCC";
 import Archive from "scenes/system/archive";
 import Requests from "scenes/data/Requests";
+import Ad from "scenes/system/ad/Ad";
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
@@ -55,6 +56,7 @@ function App() {
                   <Route path="/addcc" element={<AddCC />} />
                   <Route path="/archive" element={<Archive />} />
                   <Route path="/requests" element={<Requests />} />
+                  <Route path="/ad" element={<Ad />} />
                 </Route>
               </Routes>
             ) : (

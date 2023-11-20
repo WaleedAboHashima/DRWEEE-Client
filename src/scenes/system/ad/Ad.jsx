@@ -3,10 +3,10 @@ import { Box, Button, TextField, Typography } from "@mui/material";
 import Header from "components/Header";
 import { LanguageContext } from "language";
 import React, { useContext, useState } from "react";
-import InfoIcon from "assets/editInfo.svg";
+import InfoIcon from "assets/undraw_add_files_re_v09g.svg";
 import { useDispatch } from "react-redux";
-import { AddInfoHandler } from "apis/system/info/addInfo";
-const Info = () => {
+import { AddAdvHandler } from "apis/system/ad/adAdv";
+const Ad = () => {
   const context = useContext(LanguageContext);
   const [images, setImages] = useState([]);
   const [txt, setTxt] = useState();
@@ -17,10 +17,10 @@ const Info = () => {
     formData.append("text", txt);
     formData.append("video", video);
     images.map(image => formData.append('images', image))
-    dispatch(AddInfoHandler(formData)).then((res) => {
+    dispatch(AddAdvHandler(formData)).then((res) => {
       if (res.payload.data) {
         if (res.payload.status === 200) {
-          window.location = "/info";
+          window.location = "/ad";
         }
       }
     });
@@ -47,10 +47,10 @@ const Info = () => {
         alignItems={"center"}
       >
         <Header
-          title={context.language === "en" ? "Information" : "العملاء"}
+          title={context.language === "en" ? "Advertisement" : "العملاء"}
           subtitle={
             context.language === "en"
-              ? "Edit app information below : "
+              ? "Edit app advertisement below : "
               : "قائمه العملاء"
           }
         />
@@ -80,7 +80,7 @@ const Info = () => {
             sx={{ backgroundColor: "#7BB18D", borderRadius: 5 }}
           >
             <Header
-              title={"Please Enter Home Page Introduction Data Below: "}
+              title={"Please Enter Advertisement Data Below: "}
             />
             <TextField
               onChange={(e) => setVideo(e.target.value)}
@@ -92,7 +92,7 @@ const Info = () => {
               variant="outlined"
               multiline
               rows={6}
-              placeholder="Please enter the home page info...."
+              placeholder="Please enter the advertisement info...."
             />
             {images.length > 0 ? (
               <Box
@@ -189,12 +189,12 @@ const Info = () => {
                       />
                       <Typography variant="h6">
                         {context.language === "en"
-                          ? "Upload Home Image"
+                          ? "Upload Ad Image"
                           : "رفع صوره المتجر"}
                       </Typography>
                       <Typography variant="subtitle1" color="textSecondary">
                         {context.language === "en"
-                          ? " Click or drag and drop image file here"
+                          ? " Click to upload image file here"
                           : " انقر او اسحب الصوره هنا لرفعها"}
                       </Typography>
                     </Box>
@@ -224,4 +224,4 @@ const Info = () => {
   );
 };
 
-export default Info;
+export default Ad;

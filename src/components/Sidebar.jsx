@@ -32,6 +32,7 @@ import {
   InfoOutlined,
   ArchiveOutlined,
   BackHandOutlined,
+  EmojiEventsOutlined,
 } from "@mui/icons-material";
 import { useState } from "react";
 import FlexBetween from "./FlexBetween";
@@ -189,6 +190,11 @@ const Sidebar = ({
           text: context.language === "en" ? "Reports" : "التقارير",
           icon: <ReportGmailerrorredRounded />,
           url: "reports",
+        },
+        {
+          text: context.language === "en" ? "Ads" : "الحضور",
+          icon: <EmojiEventsOutlined />,
+          url: "ad",
         },
         {
           text: context.language === "en" ? "Info" : "الحضور",
