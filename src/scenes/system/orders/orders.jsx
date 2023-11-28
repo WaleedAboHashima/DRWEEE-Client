@@ -86,12 +86,14 @@ const Orders = () => {
   const [orderDetails, setOrderDetails] = useState({});
   const [status, setStatus] = useState(0);
   const [orders, setOrders] = useState([]);
+  const [filteredRows, setFilteredRows] = useState([]); // Filtered rows based on the condition
   const [productDetails, setProductDetails] = useState({
     Products: [],
     User: { Location: {} },
-    Info: {}
+    Info: {},
   });
   const [editOpen, setEditOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("0");
   const theme = useTheme();
   const dispatch = useDispatch();
   const columns = [
@@ -109,7 +111,7 @@ const Orders = () => {
       headerName:
         context.language === "en" ? "Customer Name" : "البريد الألكتروني",
       responsive: "sm",
-      valueGetter: ({ row }) => row.User.Name,
+      valueGetter: ({ row: { Info } }) => Info.fullName,
       width: 200,
     },
     {
@@ -117,7 +119,7 @@ const Orders = () => {
       headerName:
         context.language === "en" ? "Customer Phone" : "البريد الألكتروني",
       responsive: "sm",
-      valueGetter: ({ row }) => row.User.Phone,
+      valueGetter: ({ row: { Info } }) => Info.phone,
       width: 200,
     },
     {
@@ -166,7 +168,13 @@ const Orders = () => {
     {
       field: "TotalPrice",
       headerName: context.language === "en" ? "TotalPrice" : "الهاتف",
-      width: 250,
+      width: 150,
+    },
+    {
+      field: "createdAt",
+      headerName: "Date",
+      width: 150,
+      valueGetter: ({ row: { createdAt } }) => createdAt.substring(0, 10),
     },
     {
       width: 275,
@@ -188,7 +196,7 @@ const Orders = () => {
                 setProductDetails({
                   Products: Products,
                   User: User,
-                  Info
+                  Info,
                 });
                 setEditOpen(true);
               }}
@@ -255,6 +263,20 @@ const Orders = () => {
     // mapTypeId: "satellite", // Set default display to satellite view
   };
 
+  const handleStatusFilter = (e) => {
+    const filter = e.target.value;
+    setStatusFilter(filter);
+
+    // If no filter is selected, show all rows
+    if (!filter) {
+      setFilteredRows(rows);
+    } else {
+      // Filter the rows based on the condition and set the filteredRows state
+      const filteredRows = rows.filter((row) => row.Status === filter);
+      setFilteredRows(filteredRows);
+    }
+  };
+
   const handleEdit = () => {
     dispatch(ChangeOrderStatusHandler({ id: orderDetails._id, status })).then(
       (res) => {
@@ -301,6 +323,19 @@ const Orders = () => {
           }
         />
       </Box>
+      <Box  display={"flex"} justifyContent={"right"} m={2}>
+        <Box color={'black'} display={'flex'} gap={2} alignItems={'center'}>
+          Status Filter : 
+          <Select sx={{color: 'black'}} value={statusFilter} onChange={handleStatusFilter}>
+            <MenuItem value={"0"} disabled>Select A Filter</MenuItem>
+            <MenuItem value={"Pending"}>Pending</MenuItem>
+            <MenuItem value={"Delivered"}>Delivered</MenuItem>
+            <MenuItem value={"On the way"}>On The Way</MenuItem>
+            <MenuItem value={"Canceled"}>Canceled</MenuItem>
+          </Select>
+        </Box>
+        <Box></Box>
+      </Box>
       <Box
         mt="40px"
         height="75vh"
@@ -316,10 +351,17 @@ const Orders = () => {
           loading={orders && false}
           localeText={context.language === "en" ? null : arabicLocaleText}
           components={{ Toolbar: GridToolbar }}
-          rows={rows.map((user, index) => ({
-            id: index + 1,
-            ...user,
-          }))}
+          rows={
+            filteredRows.length
+              ? filteredRows.map((user, index) => ({
+                  id: index + 1,
+                  ...user,
+                }))
+              : rows.map((user, index) => ({
+                  id: index + 1,
+                  ...user,
+                }))
+          }
           columns={columns}
         />
       </Box>
@@ -385,7 +427,11 @@ const Orders = () => {
           )}
           <IconButton
             onClick={() => {
-              setProductDetails({ Products: [], User: { Location: {} }, Info: {} });
+              setProductDetails({
+                Products: [],
+                User: { Location: {} },
+                Info: {},
+              });
               setEditOpen(false);
             }}
           >
@@ -441,13 +487,13 @@ const Orders = () => {
                 </LoadScript>
               </Box>
               <Typography variant="h3" sx={{ textAlign: "center" }}>
-                Username: {productDetails.Info.fullName}
+                Name: {productDetails.User.Name}
               </Typography>
               <Typography variant="h3" sx={{ textAlign: "center" }}>
-                Phone: {productDetails.Info.phone}
+                Phone: {productDetails.User.Phone}
               </Typography>
               <Typography variant="h3" sx={{ textAlign: "center" }}>
-                Email: {productDetails.Info.email}
+                Address: {productDetails.User.Address}
               </Typography>
               <Typography variant="h3" sx={{ textAlign: "center" }}>
                 Products:

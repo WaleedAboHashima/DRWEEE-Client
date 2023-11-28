@@ -2,9 +2,9 @@ import { useTheme } from "@mui/material";
 import { ResponsiveBar } from "@nivo/bar";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
-// import { fetchBarData } from "./../apis/Info/BarChart";
 import { LanguageContext } from "../language";
 import { useContext } from "react";
+import { GetUsersHandler } from "apis/data/Users/GetUsers";
 
 const BarChart = ({ isDashboard = false }) => {
   const theme = useTheme();
@@ -12,7 +12,7 @@ const BarChart = ({ isDashboard = false }) => {
   const dispatch = useDispatch();
   const [data, setData] = useState([]);
   const context = useContext(LanguageContext);
-
+  const [keys, setKeys] = useState([]);
   const mockBarData = [
     {
       country: "Tito",
@@ -52,106 +52,72 @@ const BarChart = ({ isDashboard = false }) => {
       donutColor: "hsl(256, 70%, 50%)",
     },
   ];
+  useEffect(() => {
+    dispatch(GetUsersHandler()).then((res) => {
+      if (res.payload.data) {
+        const countryCounts = {};
+        const uniqueCountries = [];
+        const users = res.payload.data.allUsers;
 
-  // useEffect(() => {
-  //   dispatch(fetchBarData()).then((res) => {
-  //     if (res.payload.data) {
-  //       const categories = res.payload.data.final;
-  //       const data = categories.flatMap((c) => {
-  //         const categoryName = Object.keys(c)[0];
-  //         const items = c[categoryName];
-  //         const reducedItems = items.reduce((accumulator, item) => {
-  //           const key = context.language === "en" ? item.name : item.nameAR;
-  //           const value = item.quantity;
-  //           const name = context.language === "en" ? item.name : item.nameAR;
-  //           if (accumulator[categoryName]) {
-  //             if (
-  //               context.language === "en"
-  //                 ? !accumulator[categoryName].name.includes(name)
-  //                 : !accumulator[categoryName].nameAR.includes(name)
-  //             ) {
-  //               context.language === "en"
-  //                 ? accumulator[categoryName].name.push(name)
-  //                 : accumulator[categoryName].nameAR.push(name);
-  //             }
-  //             accumulator[categoryName][key] = value;
-  //             accumulator[categoryName].value += value;
-  //           } else {
-  //             accumulator[categoryName] =
-  //               context.language === "en"
-  //                 ? {
-  //                     category: categoryName,
-  //                     [key]: value,
-  //                     value,
-  //                     name: [name],
-  //                   }
-  //                 : {
-  //                     category: categoryName,
-  //                     [key]: value,
-  //                     value,
-  //                     nameAR: [name],
-  //                   };
-  //           }
-  //           return accumulator;
-  //         }, {});
-  //         return Object.values(reducedItems);
-  //       });
-  //       setData(data);
-  //     }
-  //   });
-  // }, [dispatch, context]);
+        users.forEach((user) => {
+          const { City } = user;
+          if (City) {
+            // Increment count for the country
+            countryCounts[City] = (countryCounts[City] || 0) + 1;
+
+            // Add the country to the uniqueCountries array if not already present
+            if (!uniqueCountries.includes(City)) {
+              uniqueCountries.push(City);
+            }
+          }
+        });
+        const countsArray = uniqueCountries.map((city) => ({
+          City: city,
+          [city]: countryCounts[city] || 0,
+        }));
+
+        // Update the state with both counts and unique country names
+        setData(countsArray);
+        setKeys(uniqueCountries);
+      }
+    });
+  }, [dispatch]);
   return (
     <ResponsiveBar
       theme={{
         axis: {
           domain: {
             line: {
-              stroke: colors.grey[100],
+              stroke: colors.grey[900],
             },
           },
           legend: {
             text: {
-              fill: colors.grey[100],
+              fill: colors.grey[900],
             },
           },
           ticks: {
             line: {
-              stroke: colors.grey[100],
+              stroke: colors.grey[900],
               strokeWidth: 1,
             },
             text: {
-              fill: colors.grey[100],
+              fill: colors.grey[900],
             },
           },
         },
         legends: {
           text: {
-            fill: colors.grey[100],
-          },
-        },
-        tooltip: {
-          container: {
-            background: theme.palette.mode === "dark" ? "black" : "white",
-            color:
-              theme.palette.mode === "dark" ? colors.primary[100] : "black",
+            fill: colors.grey[900],
           },
         },
       }}
-      data={mockBarData}
-      // keys={data.flatMap((d) =>
-      //   context.language === "en" ? d.name : d.nameAR
-      // )}
-      keys={[
-        'hot dog',
-        'burger',
-        'sandwich',
-        'kebab',
-        'fries',
-        'donut'
-    ]}
-      indexBy="category"
+      data={data}
+      keys={keys}
+      indexBy="City"
       margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
       padding={0.3}
+      tooltip={() => null} // Custom tooltip that renders nothing
       valueScale={{ type: "linear" }}
       indexScale={{ type: "band", round: true }}
       defs={[
@@ -230,9 +196,6 @@ const BarChart = ({ isDashboard = false }) => {
       ]}
       role="application"
       ariaLabel="Nivobar chart demo"
-      barAriaLabel={function (e) {
-        return e.id + ": " + e.formattedValue + " in category: " + e.indexValue;
-      }}
     />
   );
 };

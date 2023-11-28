@@ -39,6 +39,7 @@ const Products = () => {
   const [points, setPoints] = useState("");
   const [errorMessage, setError] = useState("");
   const [price, setPrice] = useState("");
+  const [index, setIndex] = useState(0);
   const [description, setDescription] = useState("");
   const navigator = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
@@ -113,6 +114,16 @@ const Products = () => {
       },
     },
   ];
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
 
   const handleFileChange = (event) => {
     setImage(event.target.files[0]);
@@ -126,6 +137,7 @@ const Products = () => {
     formData.append("points", points);
     formData.append("description", description);
     formData.append("image", image);
+    formData.append("index", index);
     dispatch(
       EditProductHandler({ id: productDetails._id, formdata: formData })
     ).then((res) => {
@@ -387,6 +399,12 @@ const Products = () => {
                 </Box>
               </Box>
             )}
+            <Select value={index} MenuProps={MenuProps} onChange={(e) => setIndex(e.target.value)}>
+              <MenuItem value={0}>Select An Index</MenuItem>
+              {rows.map((product) => (
+                <MenuItem key={product._id} value={product.Index}>{product.Index}</MenuItem>
+              ))}
+            </Select>
             <TextField
               value={name}
               onChange={(e) => setName(e.target.value)}

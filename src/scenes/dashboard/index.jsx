@@ -448,6 +448,7 @@ const Dashboard = () => {
           <Header title={context.language === 'en' ? "Services Chart" : "رسم الخدمات"} />
           <PieChart />
         </Box>
+        */}
         <Box
           gridColumn="span 6"
           gridRow="span 3"
@@ -455,9 +456,9 @@ const Dashboard = () => {
           p={"1rem"}
           borderRadius="0.55rem"
         >
-          <Header title={"Services Chart"} />
+          <Header title={"No. Of Customers In A City"} />
           <BarChart />
-        </Box> */}
+        </Box> 
       </Box>
     </Box>
   );
