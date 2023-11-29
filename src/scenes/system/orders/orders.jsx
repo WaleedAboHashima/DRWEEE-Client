@@ -1,16 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   IconButton,
   MenuItem,
@@ -21,18 +16,14 @@ import {
 import Header from "components/Header";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import {
-  Delete,
   Edit,
   CloseOutlined,
-  MoreVertOutlined,
   ArchiveOutlined,
   MoreHorizOutlined,
-  DoneOutlineOutlined,
   CheckOutlined,
   RemoveRedEyeOutlined,
 } from "@mui/icons-material";
 import { LanguageContext } from "language";
-import Cookies from "universal-cookie";
 import { useDispatch } from "react-redux";
 import { GetOrdersHandler } from "apis/data/Orders/GetOrders";
 import { ArchiveOrderHandler } from "apis/data/Orders/ArchiveOrder";
@@ -85,15 +76,16 @@ const Orders = () => {
   const [rows, setRows] = useState([]);
   const [orderDetails, setOrderDetails] = useState({});
   const [status, setStatus] = useState(0);
-  const [orders, setOrders] = useState([]);
-  const [filteredRows, setFilteredRows] = useState([]); // Filtered rows based on the condition
+  const [price, setPrice] = useState("");
+  const [filteredRows, setFilteredRows] = useState([]);
   const [productDetails, setProductDetails] = useState({
     Products: [],
     User: { Location: {} },
     Info: {},
   });
   const [editOpen, setEditOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("0");
+  const [statusFilter, setStatusFilter] = useState(0);
+  const [priceFilter, setPriceFilter] = useState(0);
   const theme = useTheme();
   const dispatch = useDispatch();
   const columns = [
@@ -227,7 +219,7 @@ const Orders = () => {
         <img
           src={row.Image}
           style={{ padding: "5px 0", borderRadius: "10px" }}
-          alt={"Product Image"}
+          alt={"Product"}
           width="60%"
           height="150%"
         />
@@ -263,17 +255,86 @@ const Orders = () => {
     // mapTypeId: "satellite", // Set default display to satellite view
   };
 
-  const handleStatusFilter = (e) => {
-    const filter = e.target.value;
-    setStatusFilter(filter);
-
-    // If no filter is selected, show all rows
-    if (!filter) {
-      setFilteredRows(rows);
+  const handleStatusSubmit = () => {
+    if (!price && priceFilter) {
+      setPriceFilter(0);
+    }
+    if (statusFilter && priceFilter) {
+      const filteredStatus = rows.filter((row) => row.Status === statusFilter);
+      switch (priceFilter) {
+        case "=":
+          const equalRows = filteredStatus.filter(
+            (row) => row.TotalPrice === parseInt(price)
+          );
+          if (equalRows.length) {
+            setFilteredRows(equalRows);
+          } else {
+            setFilteredRows("empty");
+          }
+          break;
+        case ">":
+          const greaterRows = filteredStatus.filter(
+            (row) => row.TotalPrice > parseInt(price)
+          );
+          if (greaterRows.length) {
+            setFilteredRows(greaterRows);
+          } else {
+            setFilteredRows("empty");
+          }
+          break;
+        case "<":
+          const smallerRows = filteredStatus.filter(
+            (row) => row.TotalPrice < parseInt(price)
+          );
+          if (smallerRows.length) {
+            setFilteredRows(smallerRows);
+          } else {
+            setFilteredRows("empty");
+          }
+          break;
+        default:
+          break;
+      }
+    } else if (statusFilter) {
+      const filteredStatus = rows.filter((row) => row.Status === statusFilter);
+      setFilteredRows(filteredStatus);
+    } else if (priceFilter) {
+      switch (priceFilter) {
+        case "=":
+          const equalRows = rows.filter(
+            (row) => row.TotalPrice === parseInt(price)
+          );
+          if (equalRows.length) {
+            setFilteredRows(equalRows);
+          } else {
+            setFilteredRows("empty");
+          }
+          break;
+        case ">":
+          const greaterRows = rows.filter(
+            (row) => row.TotalPrice > parseInt(price)
+          );
+          if (greaterRows.length) {
+            setFilteredRows(greaterRows);
+          } else {
+            setFilteredRows("empty");
+          }
+          break;
+        case "<":
+          const smallerRows = rows.filter(
+            (row) => row.TotalPrice < parseInt(price)
+          );
+          if (smallerRows.length) {
+            setFilteredRows(smallerRows);
+          } else {
+            setFilteredRows("empty");
+          }
+          break;
+        default:
+          break;
+      }
     } else {
-      // Filter the rows based on the condition and set the filteredRows state
-      const filteredRows = rows.filter((row) => row.Status === filter);
-      setFilteredRows(filteredRows);
+      setFilteredRows(rows);
     }
   };
 
@@ -294,7 +355,11 @@ const Orders = () => {
       }
     });
   };
-
+  useEffect(() => {
+    if (!price) {
+      setPriceFilter(0);
+    }
+  }, [price]);
   useEffect(() => {
     dispatch(GetOrdersHandler()).then((res) => {
       if (res.payload.status === 200) {
@@ -323,18 +388,44 @@ const Orders = () => {
           }
         />
       </Box>
-      <Box  display={"flex"} justifyContent={"right"} m={2}>
-        <Box color={'black'} display={'flex'} gap={2} alignItems={'center'}>
-          Status Filter : 
-          <Select sx={{color: 'black'}} value={statusFilter} onChange={handleStatusFilter}>
-            <MenuItem value={"0"} disabled>Select A Filter</MenuItem>
+      <Box display={"flex"} gap={4} justifyContent={"right"} m={2} flexDirection={{xs: 'column', lg: 'row'}}>
+        <Box color={"black"} display={"flex"} gap={2} alignItems={"center"}>
+          Status Filter :
+          <Select
+            sx={{ color: "black" }}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <MenuItem value={0}>No Filter</MenuItem>
             <MenuItem value={"Pending"}>Pending</MenuItem>
             <MenuItem value={"Delivered"}>Delivered</MenuItem>
             <MenuItem value={"On the way"}>On The Way</MenuItem>
             <MenuItem value={"Canceled"}>Canceled</MenuItem>
           </Select>
         </Box>
-        <Box></Box>
+        <Box color={"black"} display={"flex"} gap={2} alignItems={"center"} sx={{" .MuiInputBase-root" : {color: 'black'}}} flexDirection={{xs: 'column', lg: 'row'}}>
+          Price Filter :
+          <TextField
+            sx={{width: '100px'}}
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
+          <Select
+            sx={{ color: "black" }}
+            disabled={!price}
+            value={priceFilter}
+            onChange={(e) => setPriceFilter(e.target.value)}
+          >
+            <MenuItem value={0}>No Filter</MenuItem>
+            <MenuItem value={"="}>Equals</MenuItem>
+            <MenuItem value={">"}>Greater Than</MenuItem>
+            <MenuItem value={"<"}>Smaller Than</MenuItem>
+          </Select>
+          <Button onClick={handleStatusSubmit} variant="contained">
+            Submit
+          </Button>
+        </Box>
       </Box>
       <Box
         mt="40px"
@@ -348,15 +439,17 @@ const Orders = () => {
           autoPageSize
           disableSelectionOnClick
           sx={{ color: "black" }}
-          loading={orders && false}
+          loading={false}
           localeText={context.language === "en" ? null : arabicLocaleText}
           components={{ Toolbar: GridToolbar }}
           rows={
             filteredRows.length
-              ? filteredRows.map((user, index) => ({
-                  id: index + 1,
-                  ...user,
-                }))
+              ? filteredRows !== "empty"
+                ? filteredRows.map((user, index) => ({
+                    id: index + 1,
+                    ...user,
+                  }))
+                : []
               : rows.map((user, index) => ({
                   id: index + 1,
                   ...user,

@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 
 export const baseURL = "https://drweee.onrender.com";

@@ -254,7 +254,7 @@ const Countries = () => {
           <Box display={"flex"} gap={2} flexDirection={"column"}>
             {citiesData[0] !== "" ? (
               citiesData.map((city, index) => (
-                <Typography key={index}>{city}</Typography>
+                <Typography key={index}>{city.Name}</Typography>
               ))
             ) : (
               <Typography>No Cities for this country</Typography>

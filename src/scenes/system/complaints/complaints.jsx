@@ -26,7 +26,7 @@ import { LanguageContext } from "language";
 import Cookies from "universal-cookie";
 import { useDispatch } from "react-redux";
 import { GetReportsHandler } from "apis/system/Reports/GetReports";
-const Reports = () => {
+const Complaints = () => {
   const context = useContext(LanguageContext);
   const [isOpen, setisOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
@@ -304,4 +304,4 @@ const arabicLocaleText = {
       : `${count.toLocaleString()} صف محدد`,
 };
 
-export default Reports;
+export default Complaints;

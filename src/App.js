@@ -15,7 +15,6 @@ import AddAdmin from "scenes/data/Admins/AddAdmin";
 import Users from "scenes/data/Admins";
 import Countries from "scenes/system/countries/countries";
 import Info from "scenes/system/info/info";
-import Reports from "scenes/system/reports/reports";
 import Orders from "scenes/system/orders/orders";
 import Products from "scenes/data/Products";
 import AddProduct from "scenes/data/Products/AddProduct";
@@ -23,6 +22,8 @@ import AddCC from "scenes/system/countries/AddCC";
 import Archive from "scenes/system/archive";
 import Requests from "scenes/data/Requests";
 import Ad from "scenes/system/ad/Ad";
+import Complaints from "scenes/system/complaints/complaints";
+import Reports from "scenes/data/Reports";
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
@@ -45,12 +46,13 @@ function App() {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/users" element={<Users />} />
                   <Route path="/addadmin" element={<AddAdmin />} />
-                  <Route path="countries" element={<Countries />} />
+                  <Route path="/countries" element={<Countries />} />
                   <Route path="/employees" element={<Admins />} />
                   <Route path="/geography" element={<Geography />} />
-                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/complaints" element={<Complaints />} />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/info" element={<Info />} />
+                  <Route path="/reports" element={<Reports />} />
                   <Route path="/addproduct" element={<AddProduct />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/addcc" element={<AddCC />} />

@@ -33,6 +33,7 @@ import {
   ArchiveOutlined,
   BackHandOutlined,
   EmojiEventsOutlined,
+  AssessmentOutlined,
 } from "@mui/icons-material";
 import { useState } from "react";
 import FlexBetween from "./FlexBetween";
@@ -161,6 +162,11 @@ const Sidebar = ({
           url: "requests",
         },
         {
+          text: context.language === "en" ? "Reports" : "الموقع الجغرافي",
+          icon: <AssessmentOutlined />,
+          url: "reports",
+        },
+        {
           text: context.language === "en" ? "Geography" : "الموقع الجغرافي",
           icon: <PublicOutlined />,
           url: "geography",
@@ -187,9 +193,9 @@ const Sidebar = ({
           url: "archive",
         },
         {
-          text: context.language === "en" ? "Reports" : "التقارير",
+          text: context.language === "en" ? "Complaints" : "التقارير",
           icon: <ReportGmailerrorredRounded />,
-          url: "reports",
+          url: "complaints",
         },
         {
           text: context.language === "en" ? "Ads" : "الحضور",
